@@ -4,6 +4,8 @@ import Edumpers from "./components/Edumpers";
 import Home from "./components/Home";
 import Points from "./components/Points";
 import Error from "./components/Error";
+import Gemini from "./components/Gemini";
+import Contact from "./components/Contact";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const App = () => {
@@ -15,10 +17,12 @@ const App = () => {
         <Route path="/edumpers" element={<Edumpers />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/points" element={<Points />} />
+        <Route path="/gemini" element={<Gemini />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<Error />} />
       </Routes>
     </Router>
-  )
+  );
 };
 
 export default App;

@@ -24,10 +24,12 @@ const Navbar = () => {
                 </a>
                 <nav className="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400 flex flex-wrap items-center text-base justify-center">
                     <a href="/" className="mr-5 hover:text-green-600">Home</a>
-                    <a href="/about" className="mr-5 hover:text-green-600">About</a>
+                    <a href="/about" className="mr-5 hover:text-green-600">About Us</a>
                     <a href="/edumpers" className="mr-5 hover:text-green-600">E-Dumpers</a>
-                    <a href="/blogs" className="mr-5 hover:text-green-600">Blogs</a>
-                    <a href="/points" className="mr-5 hover:text-green-600">Points</a>
+                    <a href="/blogs" className="mr-5 hover:text-green-600">Insights</a>
+                    <a href="/points" className="mr-5 hover:text-green-600">Green Rewards</a>
+                    <a href="/gemini" className="mr-5 hover:text-green-600">Eco AI</a>
+                    <a href="/contact" className="mr-5 hover:text-green-600">Contact Us</a>
                 </nav>
                 {/* <button className="inline-flex items-center bg-gray-100 border-0 py-2 px-5 focus:outline-none hover:bg-green-300 rounded text-base mt-4 md:mt-0">
                     Login

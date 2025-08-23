@@ -8,47 +8,68 @@ import image6 from "../assets/images/test6.jpg"
 const Gallery = () => {
     return (
         <>
-            <section className="text-gray-600 body-font">
-                <div className="container px-5 py-24 mx-auto flex flex-wrap">
-                    <div className="flex w-full mb-5 ml-2 flex-wrap">
-                        <h1 className="text-4xl font-medium title-font text-gray-900">Example of E-waste</h1>
+            <section className="relative text-gray-600 body-font">
+                <div className="container px-5 py-24 mx-auto">
+                    {/* Title */}
+                    <div className="flex w-full mb-10 flex-wrap">
+                        <h1 className="text-4xl font-bold title-font text-gray-900 mb-4">
+                            Examples of E-Waste
+                        </h1>
+                        <p className="w-full leading-relaxed text-gray-600 text-lg">
+                            From outdated computers and broken smartphones to discarded household appliances,
+                            e-waste is a growing challenge worldwide. Proper recycling ensures that toxic
+                            materials don’t harm the environment and valuable resources are recovered responsibly.
+                        </p>
                     </div>
-                    <div className="flex flex-wrap">
-                        <div className="flex flex-wrap w-1/2">
-                            <div className="md:p-2 p-1 w-1/2">
-                                <img alt="gallery" className="w-full object-cover h-full object-center block" src={image4} />
-                            </div>
-                            <div className="md:p-2 p-1 w-1/2">
-                                <img alt="gallery" className="w-full object-cover h-full object-center block" src={image5} />
-                            </div>
-                            <div className="md:p-2 p-1 w-full">
-                                <img alt="gallery" className="w-full h-full object-cover object-center block" src={image2} />
-                            </div>
-                        </div>
-                        <div className="flex flex-wrap w-1/2">
-                            <div className="md:p-2 p-1 w-full">
-                                <img alt="gallery" className="w-full h-full object-cover object-center block" src={image1} />
-                            </div>
-                            <div className="md:p-2 p-1 w-1/2">
-                                <img alt="gallery" className="w-full object-cover h-full object-center block" src={image6} />
-                            </div>
-                            <div className="md:p-2 p-1 w-1/2">
-                                <img alt="gallery" className="w-full object-cover h-full object-center block" src={image3} />
-                            </div>
-                        </div>
+
+                    {/* Gallery Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <img
+                            src={image1}
+                            alt="Discarded computers and monitors"
+                            className="w-full h-64 object-cover rounded-xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl"
+                        />
+                        <img
+                            src={image2}
+                            alt="Old circuit boards and components"
+                            className="w-full h-64 object-cover rounded-xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl"
+                        />
+                        <img
+                            src={image3}
+                            alt="Piles of broken electronic devices"
+                            className="w-full h-64 object-cover rounded-xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl"
+                        />
+                        <img
+                            src={image4}
+                            alt="Discarded printers and appliances"
+                            className="w-full h-64 object-cover rounded-xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl"
+                        />
+                        <img
+                            src={image5}
+                            alt="Heap of old televisions"
+                            className="w-full h-64 object-cover rounded-xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl"
+                        />
+                        <img
+                            src={image6}
+                            alt="Electronic waste collection site"
+                            className="w-full h-64 object-cover rounded-xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl"
+                        />
                     </div>
-                </div>
-                <div
-                    className="absolute inset-x-0 top-[calc(100%)] -z-10 transform-gpu overflow-hidden blur-1xl "
-                    aria-hidden="true"
-                >
-                    <div
-                        className="relative left-[calc(50%)] aspect-[720/480] -translate-x-1/1 bg-gradient-to-tr from-[#50ffdf] to-[#228003] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[70rem]"
-                        style={{
-                            clipPath:
-                                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-                        }}
-                    />
+
+                    {/* Extra Description */}
+                    <div className="mt-20">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+                            Why Should We Care About E-Waste?
+                        </h2>
+                        <p className="text-gray-700 justify-center leading-relaxed">
+                            E-waste contains toxic materials like lead, mercury, and cadmium that can seep into soil and water,
+                            causing severe health risks and long-term environmental damage. At the same time, it holds valuable
+                            resources such as gold, silver, and copper that can be recovered through proper recycling. By caring
+                            about e-waste, we not only prevent pollution and protect ecosystems but also reduce the demand for
+                            new raw materials, conserve energy, and support a cleaner, more sustainable future for generations to come.
+                        </p>
+                    </div>
+
                 </div>
             </section>
         </>
