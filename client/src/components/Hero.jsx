@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import hero1 from "../assets/images/hero1.png";
 import MOE_Logo from "../assets/images/MOE_Logo.png";
 import blog1 from "../assets/images/blog1.jpg";
@@ -24,10 +25,10 @@ const Hero = () => {
                     <div className="hidden sm:mb-8 sm:flex sm:justify-center">
                         <div className="relative rounded-full px-3 py-1 text-lg leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
                             Find out how your E-Waste can be recycled today. &nbsp;
-                            <a href="/blogs" className="font-semibold text-indigo-600">
+                            <Link to="/blogs" className="font-semibold text-indigo-600">
                                 <span className="absolute inset-0" aria-hidden="true" />
                                 Read more <span aria-hidden="true">&rarr;</span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                     <h1 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-5xl">
@@ -40,12 +41,12 @@ const Hero = () => {
                         Are you looking for a convenient and responsible way to dispose of your electronic waste (e-waste)? E-Waste Dumper Locator is here to assist you in finding the nearest e-waste disposal facilities, ensuring that your e-waste is handled in an environmentally friendly and ethical manner.
                     </p>
                     <div className="mt-10 z-50 flex items-center justify-center">
-                        <a
+                        <Link
                             className="cursor-pointer rounded-md bg-green-600 px-3.5 py-2.5 text-md font-semibold text-white shadow-sm hover:bg-green-700 transition-colors"
-                            href="/edumpers"
+                            to="/edumpers"
                         >
                             Find your nearest E-Dumper
-                        </a>
+                        </Link>
                     </div>
                 </div>
                 <div className="w-300px">
@@ -111,12 +112,12 @@ const Hero = () => {
                             </div>
                             <div className="sm:w-2/3 sm:pl-8 sm:py-8 sm:border-l border-gray-200 sm:border-t-0 border-t mt-4 pt-4 sm:mt-0 text-center sm:text-left">
                                 <p className="leading-relaxed text-lg mb-4">At Green Grid, our mission is to encourage responsible e-waste disposal by making it easy and convenient for individuals and businesses to find appropriate recycling facilities. We aim to raise awareness about the importance of recycling e-waste and its positive impact on the environment.</p>
-                                <a href="/about" className="text-green-500 inline-flex items-center hover:text-green-700 transition-colors">
+                                <Link to="/about" className="text-green-500 inline-flex items-center hover:text-green-700 transition-colors">
                                     Learn More
                                     <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="w-4 h-4 ml-2" viewBox="0 0 24 24">
                                         <path d="M5 12h14M12 5l7 7-7 7"></path>
                                     </svg>
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -144,21 +145,21 @@ const Hero = () => {
                                 </div>
                                 <div>
                                     <h3>
-                                        <a
-                                            href="/#"
+                                        <Link
+                                            to="/blogs"
                                             className="inline-block mb-4 text-xl font-semibold text-gray-900 hover:text-green-600 sm:text-2xl lg:text-xl xl:text-2xl transition-colors"
                                         >
                                             Reduce Laptops Carbon Footprint Through IT Asset Disposal
-                                        </a>
+                                        </Link>
                                     </h3>
                                     <p className="text-base text-gray-600">Laptops and computers have become a necessity in the digital age. On the other hand, laptop production, utilization, and disposal contribute to carbon emissions and environmental degradation.</p>
-                                    <a href="/blogs" className="mt-5 text-green-500 inline-flex items-center hover:text-green-700 transition-colors">
+                                    <Link to="/blogs" className="mt-5 text-green-500 inline-flex items-center hover:text-green-700 transition-colors">
                                         Learn More
                                         <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M5 12h14"></path>
                                             <path d="M12 5l7 7-7 7"></path>
                                         </svg>
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -169,21 +170,21 @@ const Hero = () => {
                                 </div>
                                 <div>
                                     <h3>
-                                        <a
-                                            href="/#"
+                                        <Link
+                                            to="/blogs"
                                             className="inline-block mb-4 text-xl font-semibold text-gray-900 hover:text-green-600 sm:text-2xl lg:text-xl xl:text-2xl transition-colors"
                                         >
                                             Green Gadgets: Exploring Eco-Friendly Electronics Options
-                                        </a>
+                                        </Link>
                                     </h3>
-                                    <p className="text-base text-gray-600">In a generation described by means of speedy technological improvements, the demand for electronics is soaring. However, with this surge in innovation comes increasing difficulties for the environmental effect of digital gadgets.</p>
-                                    <a href="/blogs" className="mt-5 text-green-500 inline-flex items-center hover:text-green-700 transition-colors">
+                                    <p className="text-base text-gray-600">In a generation described by means of speedy technological advances, the demand for electronics is soaring. However, with this surge in innovation comes increasing challenges for the environmental impact of digital devices.</p>
+                                    <Link to="/blogs" className="mt-5 text-green-500 inline-flex items-center hover:text-green-700 transition-colors">
                                         Learn More
                                         <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M5 12h14"></path>
                                             <path d="M12 5l7 7-7 7"></path>
                                         </svg>
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -194,21 +195,21 @@ const Hero = () => {
                                 </div>
                                 <div>
                                     <h3>
-                                        <a
-                                            href="/#"
+                                        <Link
+                                            to="/blogs"
                                             className="inline-block mb-4 text-xl font-semibold text-gray-900 hover:text-green-600 sm:text-2xl lg:text-xl xl:text-2xl transition-colors"
                                         >
                                             Understanding e-waste: Types and consequences
-                                        </a>
+                                        </Link>
                                     </h3>
                                     <p className="text-base text-gray-600">In the present scenario, technological advancements have become a part of our daily lives. As we refurbish our smartphones, laptops, and other electronic devices, we create a lot of electronic waste or e-waste.</p>
-                                    <a href="/blogs" className="mt-5 text-green-500 inline-flex items-center hover:text-green-700 transition-colors">
+                                    <Link to="/blogs" className="mt-5 text-green-500 inline-flex items-center hover:text-green-700 transition-colors">
                                         Learn More
                                         <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M5 12h14"></path>
                                             <path d="M12 5l7 7-7 7"></path>
                                         </svg>
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>

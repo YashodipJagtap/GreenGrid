@@ -5,7 +5,7 @@ import GoogleMapReact from "google-map-react";
 
 const AnyReactComponent = (props) => {
     const [isShown, setIsShown] = useState(false);
-    const { text } = props;
+    const { text, status, capacity, hours, phone, materials, address } = props;
 
     return (
         <div
@@ -13,6 +13,9 @@ const AnyReactComponent = (props) => {
             onMouseLeave={() => setIsShown(false)}
             style={{
                 position: "relative",
+                cursor: "pointer",
+                transform: isShown ? "scale(1.2)" : "scale(1)",
+                transition: "transform 0.3s ease"
             }}
         >
             <img
@@ -20,24 +23,38 @@ const AnyReactComponent = (props) => {
                 height="40"
                 src="https://img.icons8.com/fluency/48/recycle-bin.png"
                 alt="recycle-bin"
+                style={{
+                    filter: status === "Full" ? "grayscale(100%)" : "none",
+                    opacity: status === "Closed" ? 0.5 : 1
+                }}
             />
             <div
                 style={{
                     backgroundColor: "white",
                     borderRadius: "10px",
-                    boxShadow: "0 0 5px 0 rgba(0, 0, 0, 0.2)",
+                    boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.3)",
                     position: "absolute",
-                    top: "-60px",
-                    left: "-60px",
-                    display: isShown ? "inline-block" : "none",
-                    text: "center",
-                    padding: "8px",
-                    width: "150px",
-                    fontSize: "15px",
+                    top: "-220px",
+                    left: "-100px",
+                    display: isShown ? "block" : "none",
+                    padding: "12px",
+                    width: "250px",
+                    fontSize: "14px",
                     zIndex: "9999",
+                    lineHeight: "1.5"
                 }}
             >
-                {text}
+                <h4 className="font-bold text-green-700 mb-2">{text}</h4>
+                <p className="mb-1"><span className="font-semibold">Status:</span> 
+                    <span className={status === "Available" ? "text-green-600" : status === "Full" ? "text-red-600" : "text-gray-600"}>
+                        {" " + status}
+                    </span>
+                </p>
+                <p className="mb-1"><span className="font-semibold">Capacity:</span> {capacity}</p>
+                <p className="mb-1"><span className="font-semibold">Hours:</span> {hours}</p>
+                <p className="mb-1"><span className="font-semibold">Phone:</span> {phone}</p>
+                <p className="mb-1"><span className="font-semibold">Address:</span> {address}</p>
+                <p className="mb-1"><span className="font-semibold">Materials:</span> {materials.join(", ")}</p>
             </div>
         </div>
     );
@@ -45,198 +62,227 @@ const AnyReactComponent = (props) => {
 
 const Edumpers = () => {
     const [edumpers, setEdumpers] = useState([]);
+    const [filteredEdumpers, setFilteredEdumpers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [location, setLocation] = useState({});
+    const [location, setLocation] = useState(null);
     const [nearestEdumpers, setNearestEdumpers] = useState(false);
-    const [size, setSize] = useState("Small Electronics");
-    const [item, setItem] = useState("Smartphone");
-    const [weight, setWeight] = useState(0);
-    const [points, setPoints] = useState(0);
-    const [couponCode, setCouponCode] = useState("");
-    const [message, setMessage] = useState("");
-
     const [defaultProps, setDefaultProps] = useState({
-        center: {
-            lat: 28.7041,
-            lng: 77.1025,
-        },
+        center: { lat: 20.5937, lng: 78.9629 }, // Center of India
         zoom: 5,
     });
+    const [filters, setFilters] = useState({
+        status: "All",
+        capacity: "All",
+        search: ""
+    });
+    const [selectedEdumper, setSelectedEdumper] = useState(null);
+    const [routeInfo, setRouteInfo] = useState(null);
+    const [userLocationName, setUserLocationName] = useState("");
+    const [stats, setStats] = useState({ total: 0, available: 0, full: 0, closed: 0 });
+    const [map, setMap] = useState(null);
+    const [maps, setMaps] = useState(null);
+    const [directionsRenderer, setDirectionsRenderer] = useState(null);
+    const [showTutorial, setShowTutorial] = useState(false);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [scheduleForm, setScheduleForm] = useState({
+        name: "",
+        address: "",
+        phone: "",
+        date: "",
+        time: "",
+        items: ""
+    });
+    const [currentFactIndex, setCurrentFactIndex] = useState(0);
+    const [locationError, setLocationError] = useState("");
+    const [showFilters] = useState(true); // Always show filters
+    const [impactData, setImpactData] = useState({
+        smartphones: 0,
+        laptops: 0,
+        monitors: 0,
+        tablets: 0,
+        printers: 0
+    });
+    const [impactResult, setImpactResult] = useState(null);
+
+    // Sample schedule data for pickup services
+    const pickupSchedule = [
+        { id: 1, area: "South Zone", days: "Mon, Wed, Fri", time: "9:00 AM - 12:00 PM" },
+        { id: 2, area: "North Zone", days: "Tue, Thu, Sat", time: "10:00 AM - 1:00 PM" },
+        { id: 3, area: "East Zone", days: "Mon, Thu, Sat", time: "2:00 PM - 5:00 PM" },
+        { id: 4, area: "West Zone", days: "Wed, Fri, Sun", time: "11:00 AM - 2:00 PM" },
+        { id: 5, area: "Central Zone", days: "Tue, Fri, Sun", time: "1:00 PM - 4:00 PM" }
+    ];
+
+    // E-waste facts for the carousel
+    const ewasteFacts = [
+        "Only 17.4% of e-waste is properly recycled worldwide",
+        "A million cell phones contain 35,000 lbs of copper and 772 lbs of silver",
+        "Recycling 1 million laptops saves energy equivalent to electricity for 3,500 US homes",
+        "E-waste represents 2% of America's trash in landfills but 70% of overall toxic waste",
+        "Electronic devices contain valuable materials like gold, silver, and platinum",
+        "It takes 530 lbs of fossil fuel, 48 lbs of chemicals, and 1.5 tons of water to manufacture one computer",
+        "Recycling circuit boards can be more valuable than mining for ore",
+        "Over 40 million metric tons of e-waste is generated globally each year",
+        "Only 12.5% of e-waste is currently recycled",
+        "The average household has 24 electronic products",
+        "E-waste is the fastest-growing waste stream in the world",
+        "Recycling one million laptops saves the energy equivalent to the electricity used by 3,500 US homes in a year",
+        "A single CRT computer monitor can contain up to 3.5 kg of lead",
+        "Only 10% of smartphones are recycled properly",
+        "The gold recovered from 1 ton of circuit boards is equivalent to the amount recovered from 17 tons of gold ore",
+        "Over 100,000 mobile phones are discarded every day in India alone",
+        "E-waste contains over 1,000 different substances, many of which are toxic",
+        "Proper recycling of e-waste creates jobs - 15 times more than landfilling or incineration",
+        "The value of raw materials in e-waste is estimated at $62.5 billion annually",
+        "If all e-waste was properly recycled, we could recover enough gold to make 2.5 million wedding rings"
+    ];
+
+    // Impact calculation data
+    const impactCalculations = {
+        smartphones: {
+            energy: 40, // hours of laptop usage
+            water: 100, // liters saved
+            co2: 5, // kg of CO2 prevented
+            gold: 0.034, // grams of gold recovered
+            silver: 0.35, // grams of silver recovered
+            copper: 15 // grams of copper recovered
+        },
+        laptops: {
+            energy: 48, // hours of home electricity
+            water: 500, // liters saved
+            co2: 30, // kg of CO2 prevented
+            gold: 0.2, // grams of gold recovered
+            silver: 1.0, // grams of silver recovered
+            copper: 200 // grams of copper recovered
+        },
+        monitors: {
+            energy: 24, // hours of home electricity
+            water: 300, // liters saved
+            co2: 20, // kg of CO2 prevented
+            lead: 4, // kg of lead prevented from environment
+            glass: 7 // kg of glass recycled
+        },
+        tablets: {
+            energy: 25, // hours of laptop usage
+            water: 150, // liters saved
+            co2: 8, // kg of CO2 prevented
+            gold: 0.02, // grams of gold recovered
+            silver: 0.2, // grams of silver recovered
+            copper: 10 // grams of copper recovered
+        },
+        printers: {
+            energy: 15, // hours of home electricity
+            water: 200, // liters saved
+            co2: 12, // kg of CO2 prevented
+            plastic: 2.5, // kg of plastic recycled
+            steel: 1.8 // kg of steel recycled
+        }
+    };
 
     useEffect(() => {
         getEdumpers().then((data) => {
             setEdumpers(data);
+            setFilteredEdumpers(data);
             setLoading(false);
+            
+            // Calculate stats
+            const available = data.filter(e => e.status === "Available").length;
+            const full = data.filter(e => e.status === "Full").length;
+            const closed = data.filter(e => e.status === "Closed").length;
+            setStats({ total: data.length, available, full, closed });
         });
 
         // Get user's current location
-        navigator.geolocation.getCurrentPosition((position) => {
-            setLocation({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-            });
-        });
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const userLoc = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    };
+                    setLocation(userLoc);
+                    setLocationError("");
+                    
+                    // Update map center to user location
+                    setDefaultProps(prev => ({
+                        ...prev,
+                        center: { lat: userLoc.latitude, lng: userLoc.longitude },
+                        zoom: 12
+                    }));
+                    
+                    // Get location name using reverse geocoding
+                    try {
+                        const response = await fetch(
+                            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLoc.latitude},${userLoc.longitude}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`
+                        );
+                        const data = await response.json();
+                        if (data.results && data.results[0]) {
+                            setUserLocationName(data.results[0].formatted_address);
+                        }
+                    } catch (error) {
+                        console.error("Error getting location name:", error);
+                    }
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                    setLocationError("Location access denied. Please enable location services to use all features.");
+                    setUserLocationName("Location access denied - using default location");
+                }
+            );
+        } else {
+            setLocationError("Geolocation is not supported by this browser.");
+            setUserLocationName("Geolocation not supported");
+        }
+
+        // Set up fact carousel rotation
+        const factInterval = setInterval(() => {
+            setCurrentFactIndex((prev) => (prev + 1) % ewasteFacts.length);
+        }, 7000);
 
         return () => {
-            setEdumpers([]);
-            setLoading(true);
-            setLocation({});
+            clearInterval(factInterval);
         };
     }, []);
 
     const getEdumpers = async () => {
-        // Replace this with your actual data fetching logic
+        // Enhanced data with more properties for each e-dumper
         return [
-            { id: 1, name: "E-Dumper 1", latitude: 19.0760, longitude: 72.8777 }, // Mumbai
-            { id: 2, name: "E-Dumper 2", latitude: 18.5204, longitude: 73.8567 }, // Pune
-            { id: 3, name: "E-Dumper 3", latitude: 20.0110, longitude: 73.7903 }, // Nashik
-            { id: 4, name: "E-Dumper 4", latitude: 19.2183, longitude: 73.1645 }, // Kalyan
-            { id: 5, name: "E-Dumper 5", latitude: 19.2403, longitude: 73.1305 }, // Thane
-            { id: 6, name: "E-Dumper 6", latitude: 19.9975, longitude: 73.7898 }, // Nashik Road
-            { id: 7, name: "E-Dumper 7", latitude: 19.8762, longitude: 75.3433 }, // Aurangabad
-            { id: 8, name: "E-Dumper 8", latitude: 17.6599, longitude: 75.9064 }, // Solapur
-            { id: 9, name: "E-Dumper 9", latitude: 16.8524, longitude: 74.5815 }, // Kolhapur
-            { id: 10, name: "E-Dumper 10", latitude: 21.1458, longitude: 79.0882 }, // Nagpur
-            { id: 11, name: "E-Dumper 11", latitude: 19.8876, longitude: 75.3392 }, // Jalna
-            { id: 12, name: "E-Dumper 12", latitude: 20.7463, longitude: 78.6022 }, // Akola
-            { id: 13, name: "E-Dumper 13", latitude: 21.1702, longitude: 79.0882 }, // Nagpur (different area)
-            { id: 14, name: "E-Dumper 14", latitude: 16.7050, longitude: 74.2433 }, // Sangli
-            { id: 15, name: "E-Dumper 15", latitude: 18.4077, longitude: 76.5604 }, // Latur
-            { id: 16, name: "E-Dumper 16", latitude: 21.4621, longitude: 80.1842 }, // Gondia
-            { id: 17, name: "E-Dumper 17", latitude: 19.2660, longitude: 76.7786 }, // Parbhani
-            { id: 18, name: "E-Dumper 18", latitude: 19.8465, longitude: 75.8868 }, // Beed
-            { id: 19, name: "E-Dumper 19", latitude: 19.3303, longitude: 76.1373 }, // Nanded
-            { id: 20, name: "E-Dumper 20", latitude: 19.9085, longitude: 75.5519 }, // Ahmednagar
-            { id: 21, name: "E-Dumper 21", latitude: 20.3903, longitude: 78.1306 }, // Amravati
-            { id: 22, name: "E-Dumper 22", latitude: 21.3255, longitude: 76.2311 }, // Jalgaon
-            { id: 23, name: "E-Dumper 23", latitude: 19.5744, longitude: 74.9910 }, // Shirdi
-            { id: 24, name: "E-Dumper 24", latitude: 18.9932, longitude: 73.1175 }, // Navi Mumbai
-            { id: 25, name: "E-Dumper 25", latitude: 20.3204, longitude: 74.9803 }, // Malegaon
-            { id: 26, name: "E-Dumper 26", latitude: 19.8194, longitude: 74.3213 },
-            { id: 27, name: "E-Dumper 27", latitude: 20.6233, longitude: 74.4561 },
-            { id: 28, name: "E-Dumper 28", latitude: 18.8752, longitude: 73.4567 },
-            { id: 29, name: "E-Dumper 29", latitude: 21.0557, longitude: 80.2434 },
-            { id: 30, name: "E-Dumper 30", latitude: 19.1274, longitude: 74.6723 },
-            { id: 31, name: "E-Dumper 31", latitude: 18.2653, longitude: 73.6982 },
-            { id: 32, name: "E-Dumper 32", latitude: 17.8765, longitude: 75.2368 },
-            { id: 33, name: "E-Dumper 33", latitude: 19.2983, longitude: 73.1273 },
-            { id: 34, name: "E-Dumper 34", latitude: 19.9782, longitude: 74.7313 },
-            { id: 35, name: "E-Dumper 35", latitude: 21.1923, longitude: 80.2845 },
-            { id: 36, name: "E-Dumper 36", latitude: 20.7624, longitude: 78.9023 },
-            { id: 37, name: "E-Dumper 37", latitude: 19.8976, longitude: 75.9764 },
-            { id: 38, name: "E-Dumper 38", latitude: 18.6723, longitude: 73.8294 },
-            { id: 39, name: "E-Dumper 39", latitude: 19.7834, longitude: 73.1298 },
-            { id: 40, name: "E-Dumper 40", latitude: 19.4432, longitude: 73.9724 },
-            { id: 41, name: "E-Dumper 41", latitude: 18.2473, longitude: 73.4567 },
-            { id: 42, name: "E-Dumper 42", latitude: 19.9284, longitude: 74.1342 },
-            { id: 43, name: "E-Dumper 43", latitude: 17.7383, longitude: 73.4321 },
-            { id: 44, name: "E-Dumper 44", latitude: 21.5673, longitude: 79.2345 },
-            { id: 45, name: "E-Dumper 45", latitude: 19.3847, longitude: 74.9731 },
-            { id: 46, name: "E-Dumper 46", latitude: 20.0034, longitude: 75.8745 },
-            { id: 47, name: "E-Dumper 47", latitude: 18.7654, longitude: 73.2345 },
-            { id: 48, name: "E-Dumper 48", latitude: 19.7654, longitude: 74.1234 },
-            { id: 49, name: "E-Dumper 49", latitude: 20.3456, longitude: 75.6789 },
-            { id: 50, name: "E-Dumper 50", latitude: 21.0987, longitude: 79.4567 },
-            { id: 51, name: "E-Dumper 51", latitude: 19.3214, longitude: 75.4321 },
-            { id: 52, name: "E-Dumper 52", latitude: 18.5310, longitude: 73.8496 },
-            { id: 53, name: "E-Dumper 53", latitude: 19.1442, longitude: 73.0314 },
-            { id: 54, name: "E-Dumper 54", latitude: 19.9990, longitude: 75.7683 },
-            { id: 55, name: "E-Dumper 55", latitude: 20.2234, longitude: 74.4532 },
-            { id: 56, name: "E-Dumper 56", latitude: 19.5432, longitude: 73.1234 },
-            { id: 57, name: "E-Dumper 57", latitude: 18.8765, longitude: 74.5643 },
-            { id: 58, name: "E-Dumper 58", latitude: 19.2103, longitude: 75.1098 },
-            { id: 59, name: "E-Dumper 59", latitude: 19.9084, longitude: 74.4567 },
-            { id: 60, name: "E-Dumper 60", latitude: 20.1098, longitude: 75.3456 },
-            { id: 61, name: "E-Dumper 61", latitude: 18.4321, longitude: 73.8976 },
-            { id: 62, name: "E-Dumper 62", latitude: 19.5430, longitude: 74.2034 },
-            { id: 63, name: "E-Dumper 63", latitude: 19.8765, longitude: 73.7654 },
-            { id: 64, name: "E-Dumper 64", latitude: 20.1324, longitude: 74.8765 },
-            { id: 65, name: "E-Dumper 65", latitude: 21.0342, longitude: 75.4321 },
-            { id: 66, name: "E-Dumper 66", latitude: 19.2453, longitude: 74.9876 },
-            { id: 67, name: "E-Dumper 67", latitude: 18.9543, longitude: 73.6754 },
-            { id: 68, name: "E-Dumper 68", latitude: 19.7654, longitude: 75.4321 },
-            { id: 69, name: "E-Dumper 69", latitude: 20.5432, longitude: 74.1234 },
-            { id: 70, name: "E-Dumper 70", latitude: 19.8765, longitude: 74.5432 },
-            { id: 71, name: "E-Dumper 71", latitude: 19.3214, longitude: 74.9876 },
-            { id: 72, name: "E-Dumper 72", latitude: 20.8765, longitude: 75.3214 },
-            { id: 73, name: "E-Dumper 73", latitude: 18.4321, longitude: 73.8765 },
-            { id: 74, name: "E-Dumper 74", latitude: 19.5678, longitude: 74.1234 },
-            { id: 75, name: "E-Dumper 75", latitude: 19.9876, longitude: 75.5432 },
-            { id: 76, name: "E-Dumper 76", latitude: 19.1098, longitude: 73.4321 },
-            { id: 77, name: "E-Dumper 77", latitude: 20.5432, longitude: 74.8765 },
-            { id: 78, name: "E-Dumper 78", latitude: 19.6543, longitude: 74.1098 },
-            { id: 79, name: "E-Dumper 79", latitude: 18.8765, longitude: 73.7654 },
-            { id: 80, name: "E-Dumper 80", latitude: 19.7654, longitude: 75.4321 },
-            { id: 81, name: "E-Dumper 81", latitude: 20.5432, longitude: 74.9876 },
-            { id: 82, name: "E-Dumper 82", latitude: 19.3214, longitude: 74.5678 },
-            { id: 83, name: "E-Dumper 83", latitude: 18.4321, longitude: 73.6543 },
-            { id: 84, name: "E-Dumper 84", latitude: 19.5432, longitude: 74.3214 },
-            { id: 85, name: "E-Dumper 85", latitude: 19.9876, longitude: 75.4321 },
-            { id: 86, name: "E-Dumper 86", latitude: 19.4321, longitude: 74.7654 },
-            { id: 87, name: "E-Dumper 87", latitude: 20.7654, longitude: 74.4321 },
-            { id: 88, name: "E-Dumper 88", latitude: 19.5432, longitude: 73.8765 },
-            { id: 89, name: "E-Dumper 89", latitude: 19.9876, longitude: 74.4321 },
-            { id: 90, name: "E-Dumper 90", latitude: 18.6543, longitude: 73.9876 },
-            { id: 91, name: "E-Dumper 91", latitude: 19.5432, longitude: 74.7654 },
-            { id: 92, name: "E-Dumper 92", latitude: 20.4321, longitude: 74.8765 },
-            { id: 93, name: "E-Dumper 93", latitude: 19.9876, longitude: 74.5432 },
-            { id: 94, name: "E-Dumper 94", latitude: 18.5432, longitude: 73.8765 },
-            { id: 95, name: "E-Dumper 95", latitude: 19.8765, longitude: 75.4321 },
-            { id: 96, name: "E-Dumper 96", latitude: 19.4321, longitude: 74.9876 },
-            { id: 97, name: "E-Dumper 97", latitude: 20.5432, longitude: 74.7654 },
-            { id: 98, name: "E-Dumper 98", latitude: 19.8765, longitude: 74.3214 },
-            { id: 99, name: "E-Dumper 99", latitude: 18.4321, longitude: 73.9876 },
-            { id: 100, name: "E-Dumper 100", latitude: 19.9876, longitude: 74.5432 },
-            { id: 101, name: "E-Dumper 101", latitude: 18.6543, longitude: 73.4321 },
-            { id: 102, name: "E-Dumper 102", latitude: 19.5432, longitude: 74.7654 },
-            { id: 103, name: "E-Dumper 103", latitude: 20.8765, longitude: 75.4321 },
-            { id: 104, name: "E-Dumper 104", latitude: 19.4321, longitude: 74.8765 },
-            { id: 105, name: "E-Dumper 105", latitude: 18.7654, longitude: 73.6543 },
-            { id: 106, name: "E-Dumper 106", latitude: 19.9876, longitude: 74.5432 },
-            { id: 107, name: "E-Dumper 107", latitude: 20.5432, longitude: 74.9876 },
-            { id: 108, name: "E-Dumper 108", latitude: 19.3214, longitude: 74.7654 },
-            { id: 109, name: "E-Dumper 109", latitude: 18.8765, longitude: 73.8765 },
-            { id: 110, name: "E-Dumper 110", latitude: 19.7654, longitude: 74.5432 },
-            { id: 111, name: "E-Dumper 111", latitude: 20.4321, longitude: 75.8765 },
-            { id: 112, name: "E-Dumper 112", latitude: 19.8765, longitude: 74.3214 },
-            { id: 113, name: "E-Dumper 113", latitude: 18.6543, longitude: 73.9876 },
-            { id: 114, name: "E-Dumper 114", latitude: 19.4321, longitude: 74.6543 },
-            { id: 115, name: "E-Dumper 115", latitude: 19.9876, longitude: 75.4321 },
-            { id: 116, name: "E-Dumper 116", latitude: 20.5432, longitude: 74.7654 },
-            { id: 117, name: "E-Dumper 117", latitude: 19.8765, longitude: 74.5432 },
-            { id: 118, name: "E-Dumper 118", latitude: 18.5432, longitude: 73.8765 },
-            { id: 119, name: "E-Dumper 119", latitude: 19.6543, longitude: 74.3214 },
-            { id: 120, name: "E-Dumper 120", latitude: 19.9876, longitude: 74.9876 },
-            { id: 121, name: "E-Dumper 121", latitude: 20.7654, longitude: 75.4321 },
-            { id: 122, name: "E-Dumper 122", latitude: 19.5432, longitude: 74.7654 },
-            { id: 123, name: "E-Dumper 123", latitude: 19.3214, longitude: 74.8765 },
-            { id: 124, name: "E-Dumper 124", latitude: 18.4321, longitude: 73.9876 },
-            { id: 125, name: "E-Dumper 125", latitude: 19.5432, longitude: 74.6543 },
-            { id: 126, name: "E-Dumper 126", latitude: 19.9876, longitude: 75.3214 },
-            { id: 127, name: "E-Dumper 127", latitude: 20.6543, longitude: 74.4321 },
-            { id: 128, name: "E-Dumper 128", latitude: 19.8765, longitude: 74.5432 },
-            { id: 129, name: "E-Dumper 129", latitude: 18.5432, longitude: 73.7654 },
-            { id: 130, name: "E-Dumper 130", latitude: 19.6543, longitude: 74.8765 },
-            { id: 131, name: "E-Dumper 131", latitude: 19.9876, longitude: 75.6543 },
-            { id: 132, name: "E-Dumper 132", latitude: 20.4321, longitude: 74.8765 },
-            { id: 133, name: "E-Dumper 133", latitude: 19.8765, longitude: 74.4321 },
-            { id: 134, name: "E-Dumper 134", latitude: 18.4321, longitude: 73.9876 },
-            { id: 135, name: "E-Dumper 135", latitude: 19.5432, longitude: 74.8765 },
-            { id: 136, name: "E-Dumper 136", latitude: 19.9876, longitude: 75.5432 },
-            { id: 137, name: "E-Dumper 137", latitude: 20.7654, longitude: 74.4321 },
-            { id: 138, name: "E-Dumper 138", latitude: 19.4321, longitude: 74.8765 },
-            { id: 139, name: "E-Dumper 139", latitude: 18.5432, longitude: 73.9876 },
-            { id: 140, name: "E-Dumper 140", latitude: 19.8765, longitude: 74.5432 },
-            { id: 141, name: "E-Dumper 141", latitude: 19.3214, longitude: 74.6543 },
-            { id: 142, name: "E-Dumper 142", latitude: 18.4321, longitude: 73.8765 },
-            { id: 143, name: "E-Dumper 143", latitude: 19.9876, longitude: 75.4321 },
-            { id: 144, name: "E-Dumper 144", latitude: 20.5432, longitude: 74.8765 },
-            { id: 145, name: "E-Dumper 145", latitude: 19.8765, longitude: 74.4321 },
-            { id: 146, name: "E-Dumper 146", latitude: 18.4321, longitude: 73.9876 },
-            { id: 147, name: "E-Dumper 147", latitude: 19.5432, longitude: 74.7654 },
-            { id: 148, name: "E-Dumper 148", latitude: 19.9876, longitude: 75.3214 },
-            { id: 149, name: "E-Dumper 149", latitude: 20.6543, longitude: 74.4321 },
-            { id: 150, name: "E-Dumper 150", latitude: 19.8765, longitude: 74.5432 } 
+            { id: 1, name: "E-Dumper Mumbai Central", latitude: 19.0760, longitude: 72.8777, 
+              status: "Available", capacity: "75%", hours: "8AM-8PM", phone: "+91-22-12345678", 
+              address: "Mumbai Central, Mumbai", materials: ["Phones", "Laptops", "Batteries"] },
+            { id: 2, name: "E-Dumper Pune Station", latitude: 18.5204, longitude: 73.8567, 
+              status: "Full", capacity: "100%", hours: "9AM-7PM", phone: "+91-20-87654321", 
+              address: "Pune Railway Station, Pune", materials: ["Monitors", "Printers", "Cables"] },
+            { id: 3, name: "E-Dumper Nashik City", latitude: 20.0110, longitude: 73.7903, 
+              status: "Available", capacity: "60%", hours: "8:30AM-7:30PM", phone: "+91-253-1234567", 
+              address: "City Center, Nashik", materials: ["Phones", "Tablets", "Accessories"] },
+            { id: 4, name: "E-Dumper Kalyan West", latitude: 19.2183, longitude: 73.1645, 
+              status: "Closed", capacity: "N/A", hours: "9AM-6PM", phone: "+91-251-2345678", 
+              address: "West Kalyan, Kalyan", materials: ["All Types"] },
+            { id: 5, name: "E-Dumper Thane East", latitude: 19.2403, longitude: 73.1305, 
+              status: "Available", capacity: "45%", hours: "8AM-8PM", phone: "+91-22-34567890", 
+              address: "East Thane, Thane", materials: ["Laptops", "Monitors", "Batteries"] },
+            { id: 6, name: "E-Dumper Nagpur Central", latitude: 21.1458, longitude: 79.0882, 
+              status: "Available", capacity: "30%", hours: "8:30AM-7:30PM", phone: "+91-712-4567890", 
+              address: "Central Nagpur, Nagpur", materials: ["Phones", "Tablets", "Accessories"] },
+            { id: 7, name: "E-Dumper Aurangabad", latitude: 19.8762, longitude: 75.3433, 
+              status: "Available", capacity: "50%", hours: "9AM-6PM", phone: "+91-240-5678901", 
+              address: "Aurangabad City", materials: ["All Types"] },
+            { id: 8, name: "E-Dumper Solapur", latitude: 17.6599, longitude: 75.9064, 
+              status: "Full", capacity: "100%", hours: "8AM-7PM", phone: "+91-217-6789012", 
+              address: "Solapur Main Road", materials: ["Monitors", "Printers"] },
+            { id: 9, name: "E-Dumper Kolhapur", latitude: 16.8524, longitude: 74.5815, 
+              status: "Available", capacity: "25%", hours: "8:30AM-7PM", phone: "+91-231-7890123", 
+              address: "Kolhapur City Center", materials: ["Phones", "Laptops", "Batteries"] },
+            { id: 10, name: "E-Dumper Jalna", latitude: 19.8876, longitude: 75.3392, 
+              status: "Available", capacity: "65%", hours: "9AM-6:30PM", phone: "+91-248-8901234", 
+              address: "Jalna Market Area", materials: ["All Types"] },
+            { id: 11, name: "E-Dumper Delhi Central", latitude: 28.6139, longitude: 77.2090, 
+              status: "Available", capacity: "80%", hours: "8AM-8PM", phone: "+91-11-12345678", 
+              address: "Connaught Place, Delhi", materials: ["All Types"] },
+            { id: 12, name: "E-Dumper Bangalore Tech", latitude: 12.9716, longitude: 77.5946, 
+              status: "Available", capacity: "40%", hours: "9AM-7PM", phone: "+91-80-87654321", 
+              address: "Electronic City, Bangalore", materials: ["Computers", "Servers", "Networking"] }
         ];
     };
 
@@ -259,132 +305,835 @@ const Edumpers = () => {
     };
 
     const getNearestEdumpers = () => {
+        if (!location) {
+            setLocationError("Please enable location services to find nearest E-Dumpers.");
+            return;
+        }
+        
         setNearestEdumpers(true);
-        const nearLocation = edumpers.filter((edumper) => {
+        
+        // Add distance to each edumper and sort by distance
+        const edumpersWithDistance = edumpers.map(edumper => {
             const distance = getDistanceFromLatLonInKm(
                 location.latitude,
                 location.longitude,
                 edumper.latitude,
                 edumper.longitude
             );
-            return distance <= 100;
+            return { ...edumper, distance };
         });
-
-        setEdumpers(nearLocation);
+        
+        // Sort by distance and take top 5
+        const nearest = edumpersWithDistance
+            .sort((a, b) => a.distance - b.distance)
+            .slice(0, 5);
+            
+        setFilteredEdumpers(nearest);
 
         setDefaultProps({
             center: {
                 lat: location.latitude,
                 lng: location.longitude,
             },
-            zoom: 8,
+            zoom: 11,
         });
     };
 
-    const calculatePoints = async () => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/calculate-points`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ size, weight }),
-            });
-            const data = await response.json();
-            setPoints(data.points);
-        } catch (error) {
-            setMessage("An error occurred. Please try again.");
-        }
-    };
-
-    const handleSubmit = async () => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/validate-coupon`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ couponCode }),
-            });
-            const data = await response.json();
-
-            if (data.valid) {
-                setMessage(data.message);
-                setPoints(points + data.bonusPoints);
-            } else {
-                setMessage(data.message);
+    const handleApiLoaded = (map, maps) => {
+        setMap(map);
+        setMaps(maps);
+        
+        // Initialize directions renderer
+        const renderer = new maps.DirectionsRenderer({
+            suppressMarkers: true,
+            preserveViewport: true,
+            polylineOptions: {
+                strokeColor: "#10B981",
+                strokeWeight: 5
             }
-        } catch (error) {
-            setMessage("An error occurred. Please try again.");
+        });
+        setDirectionsRenderer(renderer);
+        renderer.setMap(map);
+    };
+
+    const getDirections = (edumper) => {
+        if (!map || !maps || !location) {
+            setLocationError("Please enable location services to get directions.");
+            return;
+        }
+
+        const directionsService = new maps.DirectionsService();
+
+        directionsService.route(
+            {
+                origin: { lat: location.latitude, lng: location.longitude },
+                destination: { lat: edumper.latitude, lng: edumper.longitude },
+                travelMode: maps.TravelMode.DRIVING
+            },
+            (result, status) => {
+                if (status === "OK") {   // ✅ Fix: check string "OK"
+                    directionsRenderer.setDirections(result);
+
+                    setRouteInfo({
+                        distance: result.routes[0].legs[0].distance.text,
+                        duration: result.routes[0].legs[0].duration.text
+                    });
+                    setSelectedEdumper(edumper);
+
+                    // Zoom to fit both locations
+                    const bounds = new maps.LatLngBounds();
+                    bounds.extend(new maps.LatLng(location.latitude, location.longitude));
+                    bounds.extend(new maps.LatLng(edumper.latitude, edumper.longitude));
+                    map.fitBounds(bounds);
+                } else {
+                    console.error(`Error fetching directions: ${status}`);
+                    setLocationError("Could not get directions. Please try again.");
+                }
+            }
+        );
+    };
+
+    const clearDirections = () => {
+        if (directionsRenderer) {
+            directionsRenderer.setDirections({ routes: [] });
+            setRouteInfo(null);
+            setSelectedEdumper(null);
         }
     };
 
-    const handleRedeem = (rewardPoints) => {
-        if (points >= rewardPoints) {
-            setPoints(points - rewardPoints);
-            setMessage(`You have successfully redeemed ${rewardPoints} points!`);
-        } else {
-            setMessage("You do not have enough points to redeem this reward.");
+    const handleFilterChange = (filterType, value) => {
+        const newFilters = { ...filters, [filterType]: value };
+        setFilters(newFilters);
+        
+        let filtered = [...edumpers];
+        
+        // Apply status filter
+        if (newFilters.status !== "All") {
+            filtered = filtered.filter(e => e.status === newFilters.status);
         }
+        
+        // Apply capacity filter (simplified example)
+        if (newFilters.capacity !== "All") {
+            if (newFilters.capacity === "High") {
+                filtered = filtered.filter(e => e.status === "Available" && parseInt(e.capacity) >= 70);
+            } else if (newFilters.capacity === "Medium") {
+                filtered = filtered.filter(e => e.status === "Available" && 
+                    parseInt(e.capacity) >= 30 && parseInt(e.capacity) < 70);
+            } else if (newFilters.capacity === "Low") {
+                filtered = filtered.filter(e => e.status === "Available" && parseInt(e.capacity) < 30);
+            }
+        }
+        
+        // Apply search filter
+        if (newFilters.search) {
+            const searchLower = newFilters.search.toLowerCase();
+            filtered = filtered.filter(e => 
+                e.name.toLowerCase().includes(searchLower) || 
+                e.address.toLowerCase().includes(searchLower) ||
+                e.materials.some(m => m.toLowerCase().includes(searchLower))
+            );
+        }
+        
+        setFilteredEdumpers(filtered);
+    };
+
+    const resetFilters = () => {
+        setFilters({ status: "All", capacity: "All", search: "" });
+        setFilteredEdumpers(edumpers);
+        setNearestEdumpers(false);
+    };
+
+    const shareLocation = (edumper) => {
+        if (navigator.share) {
+            navigator.share({
+                title: `E-Dumper: ${edumper.name}`,
+                text: `Check out this E-Dumper location at ${edumper.address}. Status: ${edumper.status}, Capacity: ${edumper.capacity}`,
+                url: window.location.href
+            }).catch(error => {
+                console.log('Error sharing:', error);
+            });
+        } else {
+            // Fallback for browsers that don't support Web Share API
+            const shareText = `E-Dumper Location: ${edumper.name}\nAddress: ${edumper.address}\nStatus: ${edumper.status}\nCapacity: ${edumper.capacity}\nHours: ${edumper.hours}\nPhone: ${edumper.phone}`;
+            navigator.clipboard.writeText(shareText).then(() => {
+                alert("E-Dumper information copied to clipboard!");
+            });
+        }
+    };
+
+    const handleScheduleSubmit = (e) => {
+        e.preventDefault();
+        alert(`Thank you, ${scheduleForm.name}! Your pickup has been scheduled for ${scheduleForm.date} at ${scheduleForm.time}. We'll contact you at ${scheduleForm.phone} to confirm.`);
+        setShowScheduleModal(false);
+        setScheduleForm({
+            name: "",
+            address: "",
+            phone: "",
+            date: "",
+            time: "",
+            items: ""
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setScheduleForm({
+            ...scheduleForm,
+            [name]: value
+        });
+    };
+
+    const requestLocationAccess = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLoc = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    };
+                    setLocation(userLoc);
+                    setLocationError("");
+                    
+                    // Update map center to user location
+                    setDefaultProps(prev => ({
+                        ...prev,
+                        center: { lat: userLoc.latitude, lng: userLoc.longitude },
+                        zoom: 12
+                    }));
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                    setLocationError("Location access denied. Please enable location services in your browser settings.");
+                }
+            );
+        } else {
+            setLocationError("Geolocation is not supported by this browser.");
+        }
+    };
+
+    const handleImpactChange = (device, value) => {
+        setImpactData({
+            ...impactData,
+            [device]: parseInt(value) || 0
+        });
+    };
+
+    const calculateImpact = () => {
+        let totalEnergy = 0;
+        let totalWater = 0;
+        let totalCO2 = 0;
+        let totalGold = 0;
+        let totalSilver = 0;
+        let totalCopper = 0;
+        let totalLead = 0;
+        let totalGlass = 0;
+        let totalPlastic = 0;
+        let totalSteel = 0;
+        
+        // Calculate impact for each device type
+        Object.keys(impactData).forEach(device => {
+            const count = impactData[device];
+            const impact = impactCalculations[device];
+            
+            if (impact) {
+                totalEnergy += (impact.energy || 0) * count;
+                totalWater += (impact.water || 0) * count;
+                totalCO2 += (impact.co2 || 0) * count;
+                totalGold += (impact.gold || 0) * count;
+                totalSilver += (impact.silver || 0) * count;
+                totalCopper += (impact.copper || 0) * count;
+                totalLead += (impact.lead || 0) * count;
+                totalGlass += (impact.glass || 0) * count;
+                totalPlastic += (impact.plastic || 0) * count;
+                totalSteel += (impact.steel || 0) * count;
+            }
+        });
+        
+        setImpactResult({
+            energy: totalEnergy,
+            water: totalWater,
+            co2: totalCO2,
+            gold: totalGold,
+            silver: totalSilver,
+            copper: totalCopper,
+            lead: totalLead,
+            glass: totalGlass,
+            plastic: totalPlastic,
+            steel: totalSteel
+        });
     };
 
     return (
         <>
             <Navbar />
+            
+            {/* Tutorial Overlay */}
+            {showTutorial && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white p-6 rounded-lg max-w-md max-h-[80vh] overflow-y-auto">
+                        <h3 className="text-xl font-bold mb-4">How to Use E-Dumper Locator</h3>
+                        <ol className="list-decimal pl-5 space-y-2 mb-4">
+                            <li><strong>Enable location services</strong> for accurate results when prompted</li>
+                            <li>Click <strong>"Find Nearest"</strong> to locate E-Dumpers near you</li>
+                            <li>Use <strong>filters</strong> to find E-Dumpers by status or capacity</li>
+                            <li><strong>Hover over markers</strong> to see detailed information</li>
+                            <li>Click <strong>"Get Directions"</strong> for navigation assistance</li>
+                            <li>Use <strong>"Schedule Pickup"</strong> if you can't visit an E-Dumper</li>
+                        </ol>
+                        <div className="bg-yellow-50 p-4 rounded-lg mb-4">
+                            <h4 className="font-semibold mb-2">What can you recycle?</h4>
+                            <ul className="list-disc pl-5">
+                                <li>Smartphones, tablets, and laptops</li>
+                                <li>Computer monitors and TVs</li>
+                                <li>Batteries and charging cables</li>
+                                <li>Printers and scanners</li>
+                                <li>Small household appliances</li>
+                            </ul>
+                        </div>
+                        <button 
+                            className="w-full bg-green-600 text-white px-4 py-2 rounded font-semibold"
+                            onClick={() => setShowTutorial(false)}
+                        >
+                            Got It!
+                        </button>
+                    </div>
+                </div>
+            )}
 
-            <section className="bg-white-900 text-black">
-                <div className="mx-auto max-w-screen-xl mt-10">
-                    <div className="mx-auto max-w-1xl text-left">
-                        <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-                            Find your nearest Edumpers
-                        </h1>
-                        <div className="relative text-green-400 rounded py-3 text-md leading-6">
-                            Make sure your location is on.
+            {/* Schedule Modal */}
+            {showScheduleModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white p-6 rounded-lg max-w-md w-full">
+                        <h3 className="text-xl font-bold mb-4">Schedule a Pickup</h3>
+                        <form onSubmit={handleScheduleSubmit}>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                    <input 
+                                        type="text" 
+                                        name="name"
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                        value={scheduleForm.name}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                    <textarea 
+                                        name="address"
+                                        rows="2"
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                        value={scheduleForm.address}
+                                        onChange={handleInputChange}
+                                        required
+                                    ></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                    <input 
+                                        type="tel" 
+                                        name="phone"
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                        value={scheduleForm.phone}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+                                        <input 
+                                            type="date" 
+                                            name="date"
+                                            className="w-full p-2 border border-gray-300 rounded"
+                                            value={scheduleForm.date}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Time</label>
+                                        <input 
+                                            type="time" 
+                                            name="time"
+                                            className="w-full p-2 border border-gray-300 rounded"
+                                            value={scheduleForm.time}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Items to Recycle</label>
+                                    <textarea 
+                                        name="items"
+                                        rows="2"
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                        value={scheduleForm.items}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., 2 laptops, 5 phones, 1 monitor"
+                                        required
+                                    ></textarea>
+                                </div>
+                            </div>
+                            <div className="flex gap-3 mt-6">
+                                <button 
+                                    type="submit"
+                                    className="flex-1 bg-green-600 text-white px-4 py-2 rounded font-semibold"
+                                >
+                                    Schedule Pickup
+                                </button>
+                                <button 
+                                    type="button"
+                                    className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                                    onClick={() => setShowScheduleModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            <section className="bg-white text-black py-8">
+                <div className="mx-auto max-w-screen-xl px-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                        <div>
+                            <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+                                Find your nearest E-Dumpers
+                            </h1>
+                            <p className="text-green-600 mt-2">
+                                {userLocationName || "Make sure your location is on."}
+                            </p>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+                            <button
+                                className="flex items-center gap-2 rounded border border-indigo-600 bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 transition-colors"
+                                onClick={getNearestEdumpers}
+                            >
+                                <span className="text-sm font-medium">Find Nearest</span>
+                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                            
+                            <button
+                                className="flex items-center gap-2 rounded border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                                onClick={() => setShowTutorial(true)}
+                            >
+                                <span className="text-sm font-medium">Help</span>
+                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 01118 0z" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    <a
-                        className="mb-4 cursor-pointer inline-flex items-left gap-2 rounded border border-indigo-600 bg-indigo-600 px-5 py-2 text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500"
-                        onClick={getNearestEdumpers}
-                    >
-                        <span className="text-sm font-medium"> Click Here </span>
-                        <svg
-                            className="h-5 w-5 rtl:rotate-180"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M17 8l4 4m0 0l-4 4m4-4H3"
-                            />
-                        </svg>
-                    </a>
 
-                    <div style={{ height: "60vh", width: "100%" }}>
-                        <GoogleMapReact
-                            bootstrapURLKeys={{ key: import.meta.env.VITE_GOOGLE_API_KEY }}
-                            defaultCenter={defaultProps.center}
-                            defaultZoom={defaultProps.zoom}
-                        >
-                            {edumpers?.map((edumper) => (
-                                <AnyReactComponent
-                                    lat={edumper.latitude}
-                                    lng={edumper.longitude}
-                                    text={edumper.name}
-                                    key={edumper.id}
+                    {locationError && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
+                            <div className="flex items-center">
+                                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
+                                </svg>
+                                <span>{locationError}</span>
+                            </div>
+                            <button 
+                                className="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                                onClick={requestLocationAccess}
+                            >
+                                Enable Location Services
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Stats Overview */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <h3 className="text-lg font-semibold text-green-800">Total E-Dumpers</h3>
+                            <p className="text-3xl font-bold text-green-600">{stats.total}</p>
+                        </div>
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h3 className="text-lg font-semibold text-blue-800">Available</h3>
+                            <p className="text-3xl font-bold text-blue-600">{stats.available}</p>
+                        </div>
+                        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                            <h3 className="text-lg font-semibold text-red-800">Full</h3>
+                            <p className="text-3xl font-bold text-red-600">{stats.full}</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-800">Closed</h3>
+                            <p className="text-3xl font-bold text-gray-600">{stats.closed}</p>
+                        </div>
+                    </div>
+
+                    {/* Filters Panel - Always Visible */}
+                    <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                <select 
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                    value={filters.status}
+                                    onChange={(e) => handleFilterChange("status", e.target.value)}
+                                >
+                                    <option value="All">All Statuses</option>
+                                    <option value="Available">Available</option>
+                                    <option value="Full">Full</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
+                                <select 
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                    value={filters.capacity}
+                                    onChange={(e) => handleFilterChange("capacity", e.target.value)}
+                                >
+                                    <option value="All">All Capacities</option>
+                                    <option value="High">High (70%+)</option>
+                                    <option value="Medium">Medium (30-70%)</option>
+                                    <option value="Low">Low (&lt;30%)</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search by name, address, materials..."
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                    value={filters.search}
+                                    onChange={(e) => handleFilterChange("search", e.target.value)}
                                 />
-                            ))}
-                        </GoogleMapReact>
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-3 mt-4">
+                            <button 
+                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition-colors"
+                                onClick={resetFilters}
+                            >
+                                Reset Filters
+                            </button>
+                            <button 
+                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+                                onClick={() => setShowScheduleModal(true)}
+                            >
+                                Schedule Pickup
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Map and List View */}
+                    <div className="flex flex-col lg:flex-row gap-6 mb-12">
+                        {/* Map Container */}
+                        <div className="w-full lg:w-2/3" style={{ height: "60vh" }}>
+                            <GoogleMapReact
+                                bootstrapURLKeys={{ key: import.meta.env.VITE_GOOGLE_API_KEY }}
+                                defaultCenter={defaultProps.center}
+                                defaultZoom={defaultProps.zoom}
+                                yesIWantToUseGoogleMapApiInternals
+                                onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
+                            >
+                                {filteredEdumpers.map((edumper) => (
+                                    <AnyReactComponent
+                                        key={edumper.id}
+                                        lat={edumper.latitude}
+                                        lng={edumper.longitude}
+                                        text={edumper.name}
+                                        status={edumper.status}
+                                        capacity={edumper.capacity}
+                                        hours={edumper.hours}
+                                        phone={edumper.phone}
+                                        address={edumper.address}
+                                        materials={edumper.materials}
+                                    />
+                                ))}
+                            </GoogleMapReact>
+                            
+                            {routeInfo && selectedEdumper && (
+                                <div className="bg-white p-4 mt-4 rounded-lg shadow-md">
+                                    <h3 className="font-semibold mb-2">Route to {selectedEdumper.name}</h3>
+                                    <p>Distance: {routeInfo.distance} | Time: {routeInfo.duration}</p>
+                                    <button 
+                                        className="text-red-600 text-sm mt-2 hover:text-red-800 transition-colors"
+                                        onClick={clearDirections}
+                                    >
+                                        Clear Route
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* List View */}
+                        <div className="w-full lg:w-1/3 bg-gray-50 p-4 rounded-lg" style={{ maxHeight: "60vh", overflowY: "auto" }}>
+                            <h3 className="font-bold text-lg mb-4">E-Dumpers ({filteredEdumpers.length})</h3>
+                            
+                            {filteredEdumpers.length === 0 ? (
+                                <p className="text-gray-500">No E-Dumpers match your filters.</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {filteredEdumpers.map(edumper => (
+                                        <div key={edumper.id} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                                            <h4 className="font-semibold">{edumper.name}</h4>
+                                            <p className="text-sm text-gray-600">{edumper.address}</p>
+                                            
+                                            <div className="flex items-center mt-2">
+                                                <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                                                    edumper.status === "Available" ? "bg-green-500" : 
+                                                    edumper.status === "Full" ? "bg-red-500" : "bg-gray-500"
+                                                }`}></span>
+                                                <span className="text-sm">
+                                                    {edumper.status} • {edumper.capacity}
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="mt-3 flex flex-wrap gap-2">
+                                                <button 
+                                                    className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
+                                                    onClick={() => getDirections(edumper)}
+                                                >
+                                                    Get Directions
+                                                </button>
+                                                <button 
+                                                    className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 transition-colors"
+                                                    onClick={() => shareLocation(edumper)}
+                                                >
+                                                    Share
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="mt-2">
+                                                <p className="text-xs text-gray-500">
+                                                    Accepts: {edumper.materials.join(", ")}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    Hours: {edumper.hours} | Phone: {edumper.phone}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Additional Features Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                        {/* Pickup Schedule */}
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h2 className="text-2xl font-bold mb-4">Scheduled Pickup Services</h2>
+                            <p className="text-gray-600 mb-4">Can't reach an E-Dumper? We offer scheduled pickup services in these areas:</p>
+                            
+                            <div className="space-y-4 mb-6">
+                                {pickupSchedule.map(item => (
+                                    <div key={item.id} className="border-l-4 border-green-500 pl-4 py-2">
+                                        <h3 className="font-semibold">{item.area}</h3>
+                                        <p className="text-sm text-gray-600">{item.days} | {item.time}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <button 
+                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+                                onClick={() => setShowScheduleModal(true)}
+                            >
+                                Schedule a Pickup
+                            </button>
+                        </div>
+                        
+                        {/* E-Waste Facts Carousel */}
+                        <div className="bg-green-50 p-6 rounded-lg shadow-md">
+                            <h2 className="text-2xl font-bold mb-4">Did You Know?</h2>
+                            <div className="bg-white p-4 rounded-lg h-32 flex items-center justify-center">
+                                <p className="text-gray-800 italic text-center">"{ewasteFacts[currentFactIndex]}"</p>
+                            </div>
+                            <div className="flex justify-center mt-4">
+                                {ewasteFacts.map((_, index) => (
+                                    <button 
+                                        key={index} 
+                                        className={`w-2 h-2 rounded-full mx-1 ${index === currentFactIndex ? 'bg-green-600' : 'bg-green-300'}`}
+                                        onClick={() => setCurrentFactIndex(index)}
+                                    ></button>
+                                ))}
+                            </div>
+                            <p className="mt-4 text-sm text-gray-600">
+                                Proper e-waste disposal helps protect our environment and conserve valuable resources.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Recycling Impact Calculator */}
+                    <div className="bg-green-50 p-6 rounded-lg shadow-md mb-12">
+                        <h2 className="text-2xl font-bold mb-4">Recycling Impact Calculator</h2>
+                        <p className="text-gray-600 mb-4">See how much you can help the environment by recycling your e-waste:</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                            <div className="bg-white p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2">Smartphones</h3>
+                                <input 
+                                    type="number" 
+                                    min="0" 
+                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                                    value={impactData.smartphones}
+                                    onChange={(e) => handleImpactChange("smartphones", e.target.value)}
+                                />
+                                <p className="text-sm text-gray-600 mt-2">Saves enough energy to power a laptop for 40 hours each</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2">Laptops</h3>
+                                <input 
+                                    type="number" 
+                                    min="0" 
+                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                                    value={impactData.laptops}
+                                    onChange={(e) => handleImpactChange("laptops", e.target.value)}
+                                />
+                                <p className="text-sm text-gray-600 mt-2">Saves enough energy to power a home for 2 days each</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2">Monitors</h3>
+                                <input 
+                                    type="number" 
+                                    min="0" 
+                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                                    value={impactData.monitors}
+                                    onChange={(e) => handleImpactChange("monitors", e.target.value)}
+                                />
+                                <p className="text-sm text-gray-600 mt-2">Prevents 4 kg of lead from entering the environment each</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2">Tablets</h3>
+                                <input 
+                                    type="number" 
+                                    min="0" 
+                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                                    value={impactData.tablets}
+                                    onChange={(e) => handleImpactChange("tablets", e.target.value)}
+                                />
+                                <p className="text-sm text-gray-600 mt-2">Saves 150 liters of water and prevents 8 kg of CO2 each</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2">Printers</h3>
+                                <input 
+                                    type="number" 
+                                    min="0" 
+                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                                    value={impactData.printers}
+                                    onChange={(e) => handleImpactChange("printers", e.target.value)}
+                                />
+                                <p className="text-sm text-gray-600 mt-2">Recycles 2.5 kg of plastic and 1.8 kg of steel each</p>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+                            onClick={calculateImpact}
+                        >
+                            Calculate Impact
+                        </button>
+
+                        {impactResult && (
+                            <div className="mt-6 bg-white p-4 rounded-lg">
+                                <h3 className="font-semibold text-lg mb-3">Your Recycling Impact</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h4 className="font-medium mb-2">Environmental Impact</h4>
+                                        <ul className="space-y-1">
+                                            <li>Energy saved: <span className="font-semibold">{impactResult.energy} hours</span> of laptop usage</li>
+                                            <li>Water conserved: <span className="font-semibold">{impactResult.water} liters</span></li>
+                                            <li>CO2 emissions prevented: <span className="font-semibold">{impactResult.co2} kg</span></li>
+                                            <li>Lead prevented: <span className="font-semibold">{impactResult.lead} kg</span> from environment</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium mb-2">Materials Recovered</h4>
+                                        <ul className="space-y-1">
+                                            <li>Gold recovered: <span className="font-semibold">{impactResult.gold.toFixed(3)} grams</span></li>
+                                            <li>Silver recovered: <span className="font-semibold">{impactResult.silver.toFixed(3)} grams</span></li>
+                                            <li>Copper recovered: <span className="font-semibold">{impactResult.copper} grams</span></li>
+                                            <li>Glass recycled: <span className="font-semibold">{impactResult.glass} kg</span></li>
+                                            <li>Plastic recycled: <span className="font-semibold">{impactResult.plastic} kg</span></li>
+                                            <li>Steel recycled: <span className="font-semibold">{impactResult.steel} kg</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div className="mt-4 p-3 bg-green-100 rounded-lg">
+                                    <p className="text-green-800 font-medium">Thank you for your contribution to a cleaner environment!</p>
+                                    <p className="text-green-700 text-sm mt-1">Your recycling efforts make a significant difference in conserving resources and reducing pollution.</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Educational Resources */}
+                    <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+                        <h2 className="text-2xl font-bold mb-4">E-Waste Educational Resources</h2>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 className="font-semibold mb-2">Why Recycle E-Waste?</h3>
+                                <ul className="list-disc pl-5 text-gray-600">
+                                    <li>Prevents toxic materials from entering landfills</li>
+                                    <li>Conserves natural resources by recovering valuable materials</li>
+                                    <li>Reduces energy consumption compared to mining new materials</li>
+                                    <li>Creates jobs in the recycling industry</li>
+                                    <li>Protects the environment and human health</li>
+                                    <li>Reduces greenhouse gas emissions from manufacturing</li>
+                                    <li>Prevents soil and water contamination</li>
+                                    <li>Conserves limited natural resources</li>
+                                    <li>Supports a circular economy</li>
+                                    <li>Reduces the need for destructive mining practices</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h3 className="font-semibold mb-2">How to Prepare Your E-Waste</h3>
+                                <ul className="list-disc pl-5 text-gray-600">
+                                    <li>Back up and wipe all personal data from devices</li>
+                                    <li>Remove batteries from devices if possible</li>
+                                    <li>Keep different types of e-waste separated</li>
+                                    <li>Place small items in bags to prevent loss</li>
+                                    <li>Label devices with any known issues</li>
+                                    <li>Remove any personal storage media</li>
+                                    <li>Keep original packaging if available</li>
+                                    <li>Check for any return or trade-in programs</li>
+                                    <li>Secure fragile items to prevent damage</li>
+                                    <li>Keep cables and accessories with their devices</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-6">
+                            <h3 className="font-semibold mb-2">What Happens to Your E-Waste?</h3>
+                            <div className="bg-white p-4 rounded-lg">
+                                <p className="text-gray-600">
+                                    Once collected, your e-waste goes through a careful process: sorting, dismantling, 
+                                    separation of materials, and proper recycling. Valuable materials like gold, silver, 
+                                    copper, and palladium are recovered and used to make new products. Hazardous materials 
+                                    are disposed of safely to prevent environmental contamination. The process includes:
+                                </p>
+                                <ol className="list-decimal pl-5 mt-2 text-gray-600">
+                                    <li>Collection and transportation to recycling facilities</li>
+                                    <li>Manual sorting and disassembly of devices</li>
+                                    <li>Separation of components (circuit boards, plastics, metals)</li>
+                                    <li>Shredding and mechanical separation of materials</li>
+                                    <li>Recovery of precious metals through specialized processes</li>
+                                    <li>Proper disposal of hazardous materials</li>
+                                    <li>Quality control and preparation of recovered materials for reuse</li>
+                                    <li>Documentation and reporting of recycling outcomes</li>
+                                </ol>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-
-
-            {/* Rest of your frontend code remains the same */}
             <Footer />
         </>
     );
