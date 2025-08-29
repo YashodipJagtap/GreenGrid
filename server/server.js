@@ -11,30 +11,31 @@ const fetch = require("node-fetch");
 
 const app = express();
 
-// Middleware - CORS should be at the top
+// Load environment variables first
+dotenv.config();
+
+// Middleware - CORS should be at the top with proper configuration
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://green-grid-frontend-c7eu.onrender.com"],
     credentials: true,
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-dotenv.config();
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
 // MongoDB Connection with better error handling
 const connectDB = async () => {
     try {
-        // For development, you can use a local MongoDB or skip it
         console.log("Attempting to connect to MongoDB...".yellow);
 
         if (!process.env.MONGO_URI) {
-            console.log("MONGO_URI not set, using local MongoDB".yellow);
-            process.env.MONGO_URI = "MONGO_URI=mongodb+srv://GreenGrid:GreenGrid%402005@cluster0.symqa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+            console.log("MONGO_URI not set, using fallback MongoDB".yellow);
+            process.env.MONGO_URI = "mongodb+srv://GreenGrid:GreenGrid%402005@cluster0.symqa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
         }
 
         await mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
+            serverSelectionTimeoutMS: 10000, // Increased timeout to 10 seconds
         });
         console.log("MongoDB connected successfully!".green);
     } catch (error) {
@@ -378,7 +379,7 @@ app.listen(PORT, (err) => {
         console.log(`Error: ${err}`.red);
     }
     console.log(`Server running on PORT ${PORT}`.blue.underline);
-    console.log(`CORS enabled for: http://localhost:5173`.cyan);
+    console.log(`CORS enabled for: http://localhost:5173 and https://green-grid-frontend-c7eu.onrender.com`.cyan);
     console.log(`Uploads directory: ${uploadsDir}`.cyan);
 
     // Check if Resend is configured
