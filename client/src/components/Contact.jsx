@@ -12,8 +12,12 @@ const Contact = () => {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
-    // Environment variable se backend URL le rahe hain
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    // Environment variable se backend URL le rahe hain with fallback
+    const backendUrl = process.env.REACT_APP_BACKEND_URL ||
+        (window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1"
+            ? "http://localhost:5000"
+            : "https://greengrid-backend.onrender.com");
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
