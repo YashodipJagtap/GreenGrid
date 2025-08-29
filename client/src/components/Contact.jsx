@@ -27,7 +27,7 @@ const Contact = () => {
         try {
             // Test server connection first
             try {
-                const testResponse = await fetch("http://localhost:5000/");
+                const testResponse = await fetch("https://greengrid-backend.onrender.com/");
                 if (!testResponse.ok) {
                     throw new Error("Server is not responding");
                 }
@@ -35,7 +35,7 @@ const Contact = () => {
                 throw new Error("Cannot connect to server. Please make sure the server is running on port 5000.");
             }
 
-            const response = await fetch("http://localhost:5000/api/contact", {
+            const response = await fetch("https://greengrid-backend.onrender.com/api/contact", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -221,20 +221,20 @@ const Contact = () => {
                                 <div className="flex justify-between">
                                     <span>Monday - Friday</span>
                                     <span>9:00 AM - 6:00 PM</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Saturday</span>
-                                <span>10:00 AM - 4:00 PM</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Sunday</span>
-                                <span>Closed</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Saturday</span>
+                                    <span>10:00 AM - 4:00 PM</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Sunday</span>
+                                    <span>Closed</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div >
+            </div >
             <Footer />
         </>
     );

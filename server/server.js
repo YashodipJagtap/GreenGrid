@@ -28,7 +28,7 @@ const connectDB = async () => {
 
         if (!process.env.MONGO_URI) {
             console.log("MONGO_URI not set, using local MongoDB".yellow);
-            process.env.MONGO_URI = "mongodb://localhost:27017/greengrid";
+            process.env.MONGO_URI = "MONGO_URI=mongodb+srv://GreenGrid:GreenGrid%402005@cluster0.symqa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
         }
 
         await mongoose.connect(process.env.MONGO_URI, {
