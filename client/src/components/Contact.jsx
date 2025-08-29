@@ -12,6 +12,16 @@ const Contact = () => {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
+    // Determine the API URL based on environment
+    const getApiUrl = () => {
+        // Use the Render backend URL in production
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            return "https://greengrid-backend.onrender.com";
+        }
+        // Use localhost in development
+        return "http://localhost:5000";
+    };
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setError("");
@@ -25,17 +35,19 @@ const Contact = () => {
         setSuccess("");
 
         try {
+            const API_BASE = getApiUrl();
+
             // Test server connection first
             try {
-                const testResponse = await fetch("https://greengrid-backend.onrender.com/");
+                const testResponse = await fetch(`${API_BASE}/`);
                 if (!testResponse.ok) {
                     throw new Error("Server is not responding");
                 }
             } catch (testError) {
-                throw new Error("Cannot connect to server. Please make sure the server is running on port 5000.");
+                throw new Error("Cannot connect to server. Please make sure the server is running.");
             }
 
-            const response = await fetch("https://greengrid-backend.onrender.com/api/contact", {
+            const response = await fetch(`${API_BASE}/api/contact`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -92,7 +104,7 @@ const Contact = () => {
                                 <span className="text-red-700 font-medium">{error}</span>
                             </div>
                             {error.includes("server") && (
-                                <p className="text-sm text-red-600 mt-2">Make sure your server is running on port 5000</p>
+                                <p className="text-sm text-red-600 mt-2">Make sure your server is running</p>
                             )}
                         </div>
                     )}
