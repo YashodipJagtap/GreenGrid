@@ -398,4 +398,6 @@ app.listen(PORT, (err) => {
         console.log("Uploads directory is not accessible".red);
         console.log("Please check permissions for:", uploadsDir);
     }
+
+    
 });
