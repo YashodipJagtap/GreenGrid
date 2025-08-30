@@ -1,3 +1,4 @@
+// App.jsx
 import About from "./components/About";
 import Blogs from "./components/Blogs";
 import Edumpers from "./components/Edumpers";
