@@ -191,55 +191,55 @@ const Profile = () => {
     return (
         <>
             <Navbar />
-            <div className="min-h-screen bg-gray-50 py-12">
+            <div className="min-h-screen bg-gray-50 py-8 sm:py-12">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Back Button */}
                     <button
                         onClick={() => navigate("/")}
-                        className="flex items-center text-green-600 hover:text-green-700 mb-6 transition-colors duration-200"
+                        className="flex items-center text-green-600 hover:text-green-700 mb-4 sm:mb-6 transition-colors duration-200 text-sm sm:text-base"
                     >
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Back
                     </button>
 
                     {/* Header */}
-                    <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900">Your Profile</h1>
-                        <p className="text-lg text-gray-600 mt-2">
+                    <div className="text-center mb-6 sm:mb-8">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Your Profile</h1>
+                        <p className="text-base sm:text-lg text-gray-600 mt-2">
                             Manage your Green Grid account information
                         </p>
                     </div>
 
                     {success && (
-                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
                             <div className="flex items-center">
-                                <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mr-2 sm:mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                 </svg>
-                                <span className="text-green-700 font-medium">{success}</span>
+                                <span className="text-green-700 font-medium text-sm sm:text-base">{success}</span>
                             </div>
                         </div>
                     )}
 
                     {error && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
                             <div className="flex items-center">
-                                <svg className="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-2 sm:mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"></path>
                                 </svg>
-                                <span className="text-red-700 font-medium">{error}</span>
+                                <span className="text-red-700 font-medium text-sm sm:text-base">{error}</span>
                             </div>
                         </div>
                     )}
 
                     <div className="bg-white shadow rounded-lg overflow-hidden">
                         {/* Profile Header */}
-                        <div className="px-6 py-8 bg-green-600 text-white">
-                            <div className="flex items-center space-x-6">
+                        <div className="px-4 sm:px-6 py-6 sm:py-8 bg-green-600 text-white">
+                            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
                                 <div className="relative">
-                                    <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center text-2xl font-bold overflow-hidden">
+                                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-green-500 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold overflow-hidden">
                                         {imagePreview ? (
                                             <img
                                                 src={imagePreview}
@@ -258,7 +258,7 @@ const Profile = () => {
                                                 className="bg-white text-green-600 p-1 rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200"
                                                 title="Change photo"
                                             >
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                 </svg>
                                             </button>
@@ -269,7 +269,7 @@ const Profile = () => {
                                                     className="bg-white text-red-600 p-1 rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200"
                                                     title="Remove photo"
                                                 >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
                                                 </button>
@@ -284,20 +284,20 @@ const Profile = () => {
                                         className="hidden"
                                     />
                                 </div>
-                                <div>
-                                    <h2 className="text-2xl font-bold">
+                                <div className="text-center sm:text-left">
+                                    <h2 className="text-xl sm:text-2xl font-bold">
                                         {user.firstName} {user.lastName}
                                     </h2>
-                                    <p className="text-green-100">{getMemberSince()}</p>
+                                    <p className="text-green-100 text-sm sm:text-base">{getMemberSince()}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Profile Content */}
-                        <div className="px-6 py-8">
+                        <div className="px-4 sm:px-6 py-6 sm:py-8">
                             {isEditing ? (
-                                <form onSubmit={handleSubmit} className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                         <div>
                                             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                                                 First Name *
@@ -309,7 +309,7 @@ const Profile = () => {
                                                 value={formData.firstName}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-sm sm:text-base"
                                             />
                                         </div>
                                         <div>
@@ -323,7 +323,7 @@ const Profile = () => {
                                                 value={formData.lastName}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-sm sm:text-base"
                                             />
                                         </div>
                                     </div>
@@ -339,7 +339,7 @@ const Profile = () => {
                                             value={formData.email}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-sm sm:text-base"
                                         />
                                     </div>
 
@@ -353,7 +353,7 @@ const Profile = () => {
                                             name="phone"
                                             value={formData.phone}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-sm sm:text-base"
                                             placeholder="Enter your phone number"
                                         />
                                     </div>
@@ -368,42 +368,42 @@ const Profile = () => {
                                             value={formData.address}
                                             onChange={handleChange}
                                             rows="3"
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 resize-none"
+                                            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 resize-none text-sm sm:text-base"
                                             placeholder="Enter your address"
                                         />
                                     </div>
 
-                                    <div className="flex space-x-4 pt-4">
+                                    <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
                                         <button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-70"
+                                            className="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-70 text-sm sm:text-base"
                                         >
                                             {isSubmitting ? "Saving..." : "Save Changes"}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={handleCancelEdit}
-                                            className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                                            className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base"
                                         >
                                             Cancel
                                         </button>
                                     </div>
                                 </form>
                             ) : (
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-5 sm:space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-500 mb-1">
                                                 First Name
                                             </label>
-                                            <p className="text-lg font-medium text-gray-900">{user.firstName}</p>
+                                            <p className="text-base sm:text-lg font-medium text-gray-900">{user.firstName}</p>
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-500 mb-1">
                                                 Last Name
                                             </label>
-                                            <p className="text-lg font-medium text-gray-900">{user.lastName}</p>
+                                            <p className="text-base sm:text-lg font-medium text-gray-900">{user.lastName}</p>
                                         </div>
                                     </div>
 
@@ -411,14 +411,14 @@ const Profile = () => {
                                         <label className="block text-sm font-medium text-gray-500 mb-1">
                                             Email Address
                                         </label>
-                                        <p className="text-lg font-medium text-gray-900">{user.email}</p>
+                                        <p className="text-base sm:text-lg font-medium text-gray-900">{user.email}</p>
                                     </div>
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-500 mb-1">
                                             Phone Number
                                         </label>
-                                        <p className="text-lg font-medium text-gray-900">
+                                        <p className="text-base sm:text-lg font-medium text-gray-900">
                                             {user.phone || "Not provided"}
                                         </p>
                                     </div>
@@ -427,15 +427,15 @@ const Profile = () => {
                                         <label className="block text-sm font-medium text-gray-500 mb-1">
                                             Address
                                         </label>
-                                        <p className="text-lg font-medium text-gray-900">
+                                        <p className="text-base sm:text-lg font-medium text-gray-900">
                                             {user.address || "Not provided"}
                                         </p>
                                     </div>
 
-                                    <div className="pt-6">
+                                    <div className="pt-4 sm:pt-6">
                                         <button
                                             onClick={() => setIsEditing(true)}
-                                            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                                            className="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base"
                                         >
                                             Edit Profile
                                         </button>

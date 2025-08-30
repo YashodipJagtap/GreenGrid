@@ -62,30 +62,30 @@ function Gemini() {
     return (
         <>
             <Navbar />
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 py-16">
-                <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-7">
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8 sm:py-16">
+                <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-5 sm:p-7">
                     {/* Green Grid Styled Header */}
-                    <div className="text-center mb-7">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                    <div className="text-center mb-6 sm:mb-7">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
                             Green Grid AI Assistant
                         </h1>
-                        <p className="text-lg text-gray-600">
+                        <p className="text-base sm:text-lg text-gray-600">
                             Get expert guidance on e-waste management and recycling
                         </p>
                     </div>
 
                     {/* Input Section */}
-                    <div className="mb-7">
+                    <div className="mb-6 sm:mb-7">
                         <div className="flex justify-between items-center mb-2">
-                            <label className="block text-base font-medium text-gray-700">
+                            <label className="block text-sm sm:text-base font-medium text-gray-700">
                                 Ask about e-waste, recycling, or sustainable practices
                             </label>
                             {(prompt || response) && (
                                 <button
                                     onClick={handleClear}
-                                    className="text-sm text-red-500 hover:text-red-700 flex items-center transition-colors duration-200"
+                                    className="text-xs sm:text-sm text-red-500 hover:text-red-700 flex items-center transition-colors duration-200"
                                 >
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                     Clear All
@@ -93,7 +93,7 @@ function Gemini() {
                             )}
                         </div>
                         <textarea
-                            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none text-gray-700"
+                            className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none text-gray-700 text-sm sm:text-base"
                             rows="4"
                             placeholder="Example: How can I properly dispose of old smartphones? What are the benefits of e-waste recycling? Where can I find e-waste recycling centers near me?"
                             value={prompt}
@@ -102,11 +102,11 @@ function Gemini() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex space-x-4 mb-7">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:space-x-4 mb-6 sm:mb-7">
                         <button
                             onClick={handleSubmit}
                             disabled={loading || !prompt.trim()}
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-5 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 sm:py-3 px-4 sm:px-5 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed text-sm sm:text-base"
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center">
@@ -114,7 +114,7 @@ function Gemini() {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Processing your query...
+                                    Processing...
                                 </span>
                             ) : "Get Expert Advice"}
                         </button>
@@ -125,10 +125,10 @@ function Gemini() {
                                     navigator.clipboard.writeText(response);
                                     // You could add a toast notification here
                                 }}
-                                className="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors duration-200 flex items-center"
+                                className="px-3 sm:px-4 py-2 sm:py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
                                 title="Copy response"
                             >
-                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 Copy
@@ -138,9 +138,9 @@ function Gemini() {
 
                     {/* Response Section */}
                     {response && (
-                        <div className="mt-7 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div className="mt-6 sm:mt-7 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-lg">
                             <div className="flex justify-between items-center mb-3">
-                                <h2 className="text-xl font-semibold text-gray-900">
+                                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                                     Green Grid AI Response
                                 </h2>
                                 <button
@@ -154,7 +154,7 @@ function Gemini() {
                                 </button>
                             </div>
                             <div
-                                className="text-gray-700 leading-relaxed whitespace-pre-wrap response-content"
+                                className="text-gray-700 leading-relaxed whitespace-pre-wrap response-content text-sm sm:text-base"
                                 dangerouslySetInnerHTML={formatResponse(response)}
                             />
                         </div>
@@ -162,11 +162,11 @@ function Gemini() {
 
                     {/* Tips Section */}
                     {!response && (
-                        <div className="mt-7 bg-gray-100 p-5 rounded-lg">
-                            <h3 className="text-lg font-medium text-gray-900 mb-3">
+                        <div className="mt-6 sm:mt-7 bg-gray-100 p-4 sm:p-5 rounded-lg">
+                            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                                 Suggested Questions:
                             </h3>
-                            <ul className="list-disc list-inside text-gray-600 space-y-1.5 pl-4">
+                            <ul className="list-disc list-inside text-gray-600 space-y-1.5 pl-4 text-sm sm:text-base">
                                 <li>How to find nearest e-waste recycling centers?</li>
                                 <li>What items are considered e-waste?</li>
                                 <li>Benefits of proper e-waste disposal</li>

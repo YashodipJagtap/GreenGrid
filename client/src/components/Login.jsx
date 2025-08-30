@@ -82,41 +82,41 @@ const Login = () => {
     return (
         <>
             <Navbar />
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 py-16">
-                <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-7">
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8 sm:py-16">
+                <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-5 sm:p-7">
                     {/* Header Section */}
-                    <div className="flex flex-col text-center w-full mb-7">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                    <div className="flex flex-col text-center w-full mb-6 sm:mb-7">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
                             Welcome Back to <span className="text-green-600">Green Grid</span>
                         </h1>
-                        <p className="text-lg text-gray-600">
+                        <p className="text-base sm:text-lg text-gray-600">
                             Sign in to continue your sustainable journey
                         </p>
                     </div>
 
                     {error && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
                             <div className="flex items-center">
-                                <svg className="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-2 sm:mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"></path>
                                 </svg>
-                                <span className="text-red-700 font-medium">{error}</span>
+                                <span className="text-red-700 font-medium text-sm sm:text-base">{error}</span>
                             </div>
                         </div>
                     )}
 
                     {success && (
-                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
                             <div className="flex items-center">
-                                <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mr-2 sm:mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                 </svg>
-                                <span className="text-green-700 font-medium">{success}</span>
+                                <span className="text-green-700 font-medium text-sm sm:text-base">{success}</span>
                             </div>
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address *
@@ -128,7 +128,7 @@ const Login = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-sm sm:text-base"
                                 placeholder="your.email@example.com"
                             />
                         </div>
@@ -144,7 +144,7 @@ const Login = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-sm sm:text-base"
                                 placeholder="Enter your password"
                             />
                         </div>
@@ -152,7 +152,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-5 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-70 flex items-center justify-center"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 sm:py-3 px-4 sm:px-5 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-70 flex items-center justify-center text-sm sm:text-base"
                         >
                             {isSubmitting ? (
                                 <>
@@ -168,8 +168,8 @@ const Login = () => {
                         </button>
                     </form>
 
-                    <div className="mt-6 text-center">
-                        <p className="text-gray-600">
+                    <div className="mt-5 sm:mt-6 text-center">
+                        <p className="text-gray-600 text-sm sm:text-base">
                             Don't have an account?{" "}
                             <Link to="/signup" className="text-green-600 hover:text-green-700 font-medium">
                                 Create one here
@@ -178,20 +178,20 @@ const Login = () => {
                     </div>
 
                     {/* Quick Stats Section */}
-                    <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4 text-center">Green Grid Community Impact</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="mt-6 sm:mt-8 bg-gray-50 p-4 sm:p-6 rounded-lg">
+                        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4 text-center">Green Grid Community Impact</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-green-600">500+</div>
-                                <p className="text-sm text-gray-600">Eco Partners</p>
+                                <div className="text-xl sm:text-2xl font-bold text-green-600">500+</div>
+                                <p className="text-xs sm:text-sm text-gray-600">Eco Partners</p>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-green-600">25+ tons</div>
-                                <p className="text-sm text-gray-600">E-Waste Recycled</p>
+                                <div className="text-xl sm:text-2xl font-bold text-green-600">25+ tons</div>
+                                <p className="text-xs sm:text-sm text-gray-600">E-Waste Recycled</p>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-green-600">50+</div>
-                                <p className="text-sm text-gray-600">Recycling Centers</p>
+                                <div className="text-xl sm:text-2xl font-bold text-green-600">50+</div>
+                                <p className="text-xs sm:text-sm text-gray-600">Recycling Centers</p>
                             </div>
                         </div>
                     </div>

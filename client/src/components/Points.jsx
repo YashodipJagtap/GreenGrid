@@ -199,8 +199,8 @@ const Points = () => {
             {/* Points Calculation Section */}
             <section className="text-gray-600 body-font">
                 <div className="container px-5 mx-auto">
-                    <div className="flex flex-col lg:flex-row justify-center items-start gap-8 mb-10">
-                        <div className="w-full lg:w-1/4 bg-white p-6 rounded-lg shadow-md">
+                    <div className="flex flex-col lg:flex-row justify-center items-start gap-4 md:gap-8 mb-10">
+                        <div className="w-full lg:w-1/3 xl:w-1/4 bg-white p-4 md:p-6 rounded-lg shadow-md">
                             <h2 className="text-lg font-medium mb-4">Calculate Points</h2>
                             <div className="flex flex-col items-start mb-4">
                                 <span className="mb-2 font-medium">Electronics Size</span>
@@ -259,7 +259,7 @@ const Points = () => {
                             </div>
                         </div>
 
-                        <div className="w-full lg:w-1/4 bg-white p-6 rounded-lg shadow-md">
+                        <div className="w-full lg:w-1/3 xl:w-1/4 bg-white p-4 md:p-6 rounded-lg shadow-md">
                             <h2 className="text-lg font-medium mb-4">Apply Coupon</h2>
                             <div className="flex flex-col">
                                 <div className="mb-4">
@@ -291,8 +291,8 @@ const Points = () => {
                             </div>
                         </div>
 
-                        <div className="w-full lg:w-1/4 flex justify-center">
-                            <div className="flex flex-col rounded-lg border border-gray-200 px-6 py-6 text-center shadow-md w-full bg-white">
+                        <div className="w-full lg:w-1/3 xl:w-1/4 flex justify-center">
+                            <div className="flex flex-col rounded-lg border border-gray-200 px-4 md:px-6 py-4 md:py-6 text-center shadow-md w-full bg-white">
                                 <dt className="order-last text-lg font-medium text-gray-500">Total Points</dt>
                                 <dd className="text-4xl font-extrabold text-green-600 md:text-5xl">{points}</dd>
                             </div>
@@ -303,12 +303,12 @@ const Points = () => {
 
             {/* Rewards Section */}
             <section className="text-gray-600 body-font">
-                <div className="container px-5 py-24 mx-auto">
+                <div className="container px-5 py-12 md:py-24 mx-auto">
                     <div className="flex flex-col text-center w-full mb-12">
                         <h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Available Rewards</h1>
                         <p className="lg:w-2/3 mx-auto leading-relaxed text-base">Redeem your points for these exciting rewards.</p>
                     </div>
-                    <div className="flex flex-wrap -m-4">
+                    <div className="flex flex-wrap -m-2 md:-m-4">
                         {[
                             { img: img1, title: "Certificate", points: 1 },
                             { img: img2, title: "T-Shirt", points: 3 },
@@ -323,7 +323,7 @@ const Points = () => {
                             { img: img11, title: "Cup", points: 10 },
                             { img: img12, title: "Dustbin", points: 15 },
                         ].map((reward, index) => (
-                            <div key={index} className="lg:w-1/4 md:w-1/2 p-4 w-full">
+                            <div key={index} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-2 md:p-4">
                                 <div className="block relative h-48 rounded overflow-hidden shadow-md">
                                     <img
                                         alt={reward.title}
@@ -338,7 +338,7 @@ const Points = () => {
                                     </div>
                                     <button
                                         onClick={() => handleRedeem(reward.points, reward.title)}
-                                        className="mt-2 py-2 w-full flex rounded-lg justify-center bg-green-500 font-semibold text-white hover:bg-green-600 transition-colors duration-200"
+                                        className="mt-2 py-2 w-full flex rounded-lg justify-center bg-green-500 font-semibold text-white hover:bg-green-600 transition-colors duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
                                         disabled={points < reward.points}
                                     >
                                         {points >= reward.points ? "Redeem" : "Insufficient Points"}
@@ -353,7 +353,7 @@ const Points = () => {
             {/* Delivery Form */}
             {showDeliveryForm && (
                 <section className="text-gray-600 body-font">
-                    <div className="container px-5 py-24 mx-auto">
+                    <div className="container px-5 py-12 md:py-24 mx-auto">
                         <div className="flex flex-col text-center w-full mb-12">
                             <h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Home Delivery Form</h1>
                             <p className="lg:w-2/3 mx-auto leading-relaxed text-base">Provide your details for home delivery.</p>
@@ -447,7 +447,7 @@ const Points = () => {
 
             {/* Message Pop-up */}
             {message && (
-                <div className="fixed bottom-4 right-4 m-4 p-4 bg-green-500 text-white rounded-lg shadow-lg z-50 transition-opacity duration-300">
+                <div className="fixed bottom-4 right-4 m-4 p-4 bg-green-500 text-white rounded-lg shadow-lg z-50 transition-opacity duration-300 max-w-xs md:max-w-md">
                     {message}
                 </div>
             )}

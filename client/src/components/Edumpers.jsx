@@ -11,6 +11,7 @@ const AnyReactComponent = (props) => {
         <div
             onMouseEnter={() => setIsShown(true)}
             onMouseLeave={() => setIsShown(false)}
+            onClick={() => setIsShown(!isShown)}
             style={{
                 position: "relative",
                 cursor: "pointer",
@@ -29,23 +30,24 @@ const AnyReactComponent = (props) => {
                 }}
             />
             <div
+                className="map-tooltip"
                 style={{
                     backgroundColor: "white",
                     borderRadius: "10px",
                     boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.3)",
                     position: "absolute",
-                    top: "-220px",
-                    left: "-100px",
+                    top: window.innerWidth < 768 ? "-10px" : "-220px",
+                    left: window.innerWidth < 768 ? "50px" : "-100px",
                     display: isShown ? "block" : "none",
                     padding: "12px",
-                    width: "250px",
+                    width: window.innerWidth < 768 ? "200px" : "250px",
                     fontSize: "14px",
                     zIndex: "9999",
                     lineHeight: "1.5"
                 }}
             >
                 <h4 className="font-bold text-green-700 mb-2">{text}</h4>
-                <p className="mb-1"><span className="font-semibold">Status:</span> 
+                <p className="mb-1"><span className="font-semibold">Status:</span>
                     <span className={status === "Available" ? "text-green-600" : status === "Full" ? "text-red-600" : "text-gray-600"}>
                         {" " + status}
                     </span>
@@ -184,7 +186,7 @@ const Edumpers = () => {
             setEdumpers(data);
             setFilteredEdumpers(data);
             setLoading(false);
-            
+
             // Calculate stats
             const available = data.filter(e => e.status === "Available").length;
             const full = data.filter(e => e.status === "Full").length;
@@ -202,14 +204,14 @@ const Edumpers = () => {
                     };
                     setLocation(userLoc);
                     setLocationError("");
-                    
+
                     // Update map center to user location
                     setDefaultProps(prev => ({
                         ...prev,
                         center: { lat: userLoc.latitude, lng: userLoc.longitude },
                         zoom: 12
                     }));
-                    
+
                     // Get location name using reverse geocoding
                     try {
                         const response = await fetch(
@@ -247,42 +249,66 @@ const Edumpers = () => {
     const getEdumpers = async () => {
         // Enhanced data with more properties for each e-dumper
         return [
-            { id: 1, name: "E-Dumper Mumbai Central", latitude: 19.0760, longitude: 72.8777, 
-              status: "Available", capacity: "75%", hours: "8AM-8PM", phone: "+91-22-12345678", 
-              address: "Mumbai Central, Mumbai", materials: ["Phones", "Laptops", "Batteries"] },
-            { id: 2, name: "E-Dumper Pune Station", latitude: 18.5204, longitude: 73.8567, 
-              status: "Full", capacity: "100%", hours: "9AM-7PM", phone: "+91-20-87654321", 
-              address: "Pune Railway Station, Pune", materials: ["Monitors", "Printers", "Cables"] },
-            { id: 3, name: "E-Dumper Nashik City", latitude: 20.0110, longitude: 73.7903, 
-              status: "Available", capacity: "60%", hours: "8:30AM-7:30PM", phone: "+91-253-1234567", 
-              address: "City Center, Nashik", materials: ["Phones", "Tablets", "Accessories"] },
-            { id: 4, name: "E-Dumper Kalyan West", latitude: 19.2183, longitude: 73.1645, 
-              status: "Closed", capacity: "N/A", hours: "9AM-6PM", phone: "+91-251-2345678", 
-              address: "West Kalyan, Kalyan", materials: ["All Types"] },
-            { id: 5, name: "E-Dumper Thane East", latitude: 19.2403, longitude: 73.1305, 
-              status: "Available", capacity: "45%", hours: "8AM-8PM", phone: "+91-22-34567890", 
-              address: "East Thane, Thane", materials: ["Laptops", "Monitors", "Batteries"] },
-            { id: 6, name: "E-Dumper Nagpur Central", latitude: 21.1458, longitude: 79.0882, 
-              status: "Available", capacity: "30%", hours: "8:30AM-7:30PM", phone: "+91-712-4567890", 
-              address: "Central Nagpur, Nagpur", materials: ["Phones", "Tablets", "Accessories"] },
-            { id: 7, name: "E-Dumper Aurangabad", latitude: 19.8762, longitude: 75.3433, 
-              status: "Available", capacity: "50%", hours: "9AM-6PM", phone: "+91-240-5678901", 
-              address: "Aurangabad City", materials: ["All Types"] },
-            { id: 8, name: "E-Dumper Solapur", latitude: 17.6599, longitude: 75.9064, 
-              status: "Full", capacity: "100%", hours: "8AM-7PM", phone: "+91-217-6789012", 
-              address: "Solapur Main Road", materials: ["Monitors", "Printers"] },
-            { id: 9, name: "E-Dumper Kolhapur", latitude: 16.8524, longitude: 74.5815, 
-              status: "Available", capacity: "25%", hours: "8:30AM-7PM", phone: "+91-231-7890123", 
-              address: "Kolhapur City Center", materials: ["Phones", "Laptops", "Batteries"] },
-            { id: 10, name: "E-Dumper Jalna", latitude: 19.8876, longitude: 75.3392, 
-              status: "Available", capacity: "65%", hours: "9AM-6:30PM", phone: "+91-248-8901234", 
-              address: "Jalna Market Area", materials: ["All Types"] },
-            { id: 11, name: "E-Dumper Delhi Central", latitude: 28.6139, longitude: 77.2090, 
-              status: "Available", capacity: "80%", hours: "8AM-8PM", phone: "+91-11-12345678", 
-              address: "Connaught Place, Delhi", materials: ["All Types"] },
-            { id: 12, name: "E-Dumper Bangalore Tech", latitude: 12.9716, longitude: 77.5946, 
-              status: "Available", capacity: "40%", hours: "9AM-7PM", phone: "+91-80-87654321", 
-              address: "Electronic City, Bangalore", materials: ["Computers", "Servers", "Networking"] }
+            {
+                id: 1, name: "E-Dumper Mumbai Central", latitude: 19.0760, longitude: 72.8777,
+                status: "Available", capacity: "75%", hours: "8AM-8PM", phone: "+91-22-12345678",
+                address: "Mumbai Central, Mumbai", materials: ["Phones", "Laptops", "Batteries"]
+            },
+            {
+                id: 2, name: "E-Dumper Pune Station", latitude: 18.5204, longitude: 73.8567,
+                status: "Full", capacity: "100%", hours: "9AM-7PM", phone: "+91-20-87654321",
+                address: "Pune Railway Station, Pune", materials: ["Monitors", "Printers", "Cables"]
+            },
+            {
+                id: 3, name: "E-Dumper Nashik City", latitude: 20.0110, longitude: 73.7903,
+                status: "Available", capacity: "60%", hours: "8:30AM-7:30PM", phone: "+91-253-1234567",
+                address: "City Center, Nashik", materials: ["Phones", "Tablets", "Accessories"]
+            },
+            {
+                id: 4, name: "E-Dumper Kalyan West", latitude: 19.2183, longitude: 73.1645,
+                status: "Closed", capacity: "N/A", hours: "9AM-6PM", phone: "+91-251-2345678",
+                address: "West Kalyan, Kalyan", materials: ["All Types"]
+            },
+            {
+                id: 5, name: "E-Dumper Thane East", latitude: 19.2403, longitude: 73.1305,
+                status: "Available", capacity: "45%", hours: "8AM-8PM", phone: "+91-22-34567890",
+                address: "East Thane, Thane", materials: ["Laptops", "Monitors", "Batteries"]
+            },
+            {
+                id: 6, name: "E-Dumper Nagpur Central", latitude: 21.1458, longitude: 79.0882,
+                status: "Available", capacity: "30%", hours: "8:30AM-7:30PM", phone: "+91-712-4567890",
+                address: "Central Nagpur, Nagpur", materials: ["Phones", "Tablets", "Accessories"]
+            },
+            {
+                id: 7, name: "E-Dumper Aurangabad", latitude: 19.8762, longitude: 75.3433,
+                status: "Available", capacity: "50%", hours: "9AM-6PM", phone: "+91-240-5678901",
+                address: "Aurangabad City", materials: ["All Types"]
+            },
+            {
+                id: 8, name: "E-Dumper Solapur", latitude: 17.6599, longitude: 75.9064,
+                status: "Full", capacity: "100%", hours: "8AM-7PM", phone: "+91-217-6789012",
+                address: "Solapur Main Road", materials: ["Monitors", "Printers"]
+            },
+            {
+                id: 9, name: "E-Dumper Kolhapur", latitude: 16.8524, longitude: 74.5815,
+                status: "Available", capacity: "25%", hours: "8:30AM-7PM", phone: "+91-231-7890123",
+                address: "Kolhapur City Center", materials: ["Phones", "Laptops", "Batteries"]
+            },
+            {
+                id: 10, name: "E-Dumper Jalna", latitude: 19.8876, longitude: 75.3392,
+                status: "Available", capacity: "65%", hours: "9AM-6:30PM", phone: "+91-248-8901234",
+                address: "Jalna Market Area", materials: ["All Types"]
+            },
+            {
+                id: 11, name: "E-Dumper Delhi Central", latitude: 28.6139, longitude: 77.2090,
+                status: "Available", capacity: "80%", hours: "8AM-8PM", phone: "+91-11-12345678",
+                address: "Connaught Place, Delhi", materials: ["All Types"]
+            },
+            {
+                id: 12, name: "E-Dumper Bangalore Tech", latitude: 12.9716, longitude: 77.5946,
+                status: "Available", capacity: "40%", hours: "9AM-7PM", phone: "+91-80-87654321",
+                address: "Electronic City, Bangalore", materials: ["Computers", "Servers", "Networking"]
+            }
         ];
     };
 
@@ -309,9 +335,9 @@ const Edumpers = () => {
             setLocationError("Please enable location services to find nearest E-Dumpers.");
             return;
         }
-        
+
         setNearestEdumpers(true);
-        
+
         // Add distance to each edumper and sort by distance
         const edumpersWithDistance = edumpers.map(edumper => {
             const distance = getDistanceFromLatLonInKm(
@@ -322,12 +348,12 @@ const Edumpers = () => {
             );
             return { ...edumper, distance };
         });
-        
+
         // Sort by distance and take top 5
         const nearest = edumpersWithDistance
             .sort((a, b) => a.distance - b.distance)
             .slice(0, 5);
-            
+
         setFilteredEdumpers(nearest);
 
         setDefaultProps({
@@ -342,7 +368,7 @@ const Edumpers = () => {
     const handleApiLoaded = (map, maps) => {
         setMap(map);
         setMaps(maps);
-        
+
         // Initialize directions renderer
         const renderer = new maps.DirectionsRenderer({
             suppressMarkers: true,
@@ -404,36 +430,36 @@ const Edumpers = () => {
     const handleFilterChange = (filterType, value) => {
         const newFilters = { ...filters, [filterType]: value };
         setFilters(newFilters);
-        
+
         let filtered = [...edumpers];
-        
+
         // Apply status filter
         if (newFilters.status !== "All") {
             filtered = filtered.filter(e => e.status === newFilters.status);
         }
-        
+
         // Apply capacity filter (simplified example)
         if (newFilters.capacity !== "All") {
             if (newFilters.capacity === "High") {
                 filtered = filtered.filter(e => e.status === "Available" && parseInt(e.capacity) >= 70);
             } else if (newFilters.capacity === "Medium") {
-                filtered = filtered.filter(e => e.status === "Available" && 
+                filtered = filtered.filter(e => e.status === "Available" &&
                     parseInt(e.capacity) >= 30 && parseInt(e.capacity) < 70);
             } else if (newFilters.capacity === "Low") {
                 filtered = filtered.filter(e => e.status === "Available" && parseInt(e.capacity) < 30);
             }
         }
-        
+
         // Apply search filter
         if (newFilters.search) {
             const searchLower = newFilters.search.toLowerCase();
-            filtered = filtered.filter(e => 
-                e.name.toLowerCase().includes(searchLower) || 
+            filtered = filtered.filter(e =>
+                e.name.toLowerCase().includes(searchLower) ||
                 e.address.toLowerCase().includes(searchLower) ||
                 e.materials.some(m => m.toLowerCase().includes(searchLower))
             );
         }
-        
+
         setFilteredEdumpers(filtered);
     };
 
@@ -493,7 +519,7 @@ const Edumpers = () => {
                     };
                     setLocation(userLoc);
                     setLocationError("");
-                    
+
                     // Update map center to user location
                     setDefaultProps(prev => ({
                         ...prev,
@@ -529,12 +555,12 @@ const Edumpers = () => {
         let totalGlass = 0;
         let totalPlastic = 0;
         let totalSteel = 0;
-        
+
         // Calculate impact for each device type
         Object.keys(impactData).forEach(device => {
             const count = impactData[device];
             const impact = impactCalculations[device];
-            
+
             if (impact) {
                 totalEnergy += (impact.energy || 0) * count;
                 totalWater += (impact.water || 0) * count;
@@ -548,7 +574,7 @@ const Edumpers = () => {
                 totalSteel += (impact.steel || 0) * count;
             }
         });
-        
+
         setImpactResult({
             energy: totalEnergy,
             water: totalWater,
@@ -566,7 +592,7 @@ const Edumpers = () => {
     return (
         <>
             <Navbar />
-            
+
             {/* Tutorial Overlay */}
             {showTutorial && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
@@ -590,7 +616,7 @@ const Edumpers = () => {
                                 <li>Small household appliances</li>
                             </ul>
                         </div>
-                        <button 
+                        <button
                             className="w-full bg-green-600 text-white px-4 py-2 rounded font-semibold"
                             onClick={() => setShowTutorial(false)}
                         >
@@ -609,8 +635,8 @@ const Edumpers = () => {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         name="name"
                                         className="w-full p-2 border border-gray-300 rounded"
                                         value={scheduleForm.name}
@@ -620,7 +646,7 @@ const Edumpers = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                                    <textarea 
+                                    <textarea
                                         name="address"
                                         rows="2"
                                         className="w-full p-2 border border-gray-300 rounded"
@@ -631,8 +657,8 @@ const Edumpers = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                    <input 
-                                        type="tel" 
+                                    <input
+                                        type="tel"
                                         name="phone"
                                         className="w-full p-2 border border-gray-300 rounded"
                                         value={scheduleForm.phone}
@@ -640,11 +666,11 @@ const Edumpers = () => {
                                         required
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
-                                        <input 
-                                            type="date" 
+                                        <input
+                                            type="date"
                                             name="date"
                                             className="w-full p-2 border border-gray-300 rounded"
                                             value={scheduleForm.date}
@@ -654,8 +680,8 @@ const Edumpers = () => {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Time</label>
-                                        <input 
-                                            type="time" 
+                                        <input
+                                            type="time"
                                             name="time"
                                             className="w-full p-2 border border-gray-300 rounded"
                                             value={scheduleForm.time}
@@ -666,7 +692,7 @@ const Edumpers = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Items to Recycle</label>
-                                    <textarea 
+                                    <textarea
                                         name="items"
                                         rows="2"
                                         className="w-full p-2 border border-gray-300 rounded"
@@ -677,14 +703,14 @@ const Edumpers = () => {
                                     ></textarea>
                                 </div>
                             </div>
-                            <div className="flex gap-3 mt-6">
-                                <button 
+                            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                                <button
                                     type="submit"
                                     className="flex-1 bg-green-600 text-white px-4 py-2 rounded font-semibold"
                                 >
                                     Schedule Pickup
                                 </button>
-                                <button 
+                                <button
                                     type="button"
                                     className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded"
                                     onClick={() => setShowScheduleModal(false)}
@@ -701,32 +727,32 @@ const Edumpers = () => {
                 <div className="mx-auto max-w-screen-xl px-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                         <div>
-                            <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+                            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
                                 Find your nearest E-Dumpers
                             </h1>
                             <p className="text-green-600 mt-2">
                                 {userLocationName || "Make sure your location is on."}
                             </p>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
                             <button
-                                className="flex items-center gap-2 rounded border border-indigo-600 bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 transition-colors"
+                                className="flex items-center gap-2 rounded border border-indigo-600 bg-indigo-600 px-3 sm:px-4 py-2 text-white hover:bg-indigo-700 transition-colors text-sm sm:text-base"
                                 onClick={getNearestEdumpers}
                             >
                                 <span className="text-sm font-medium">Find Nearest</span>
-                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="h-4 w-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </button>
-                            
+
                             <button
-                                className="flex items-center gap-2 rounded border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                                className="flex items-center gap-2 rounded border border-gray-300 bg-white px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors text-sm sm:text-base"
                                 onClick={() => setShowTutorial(true)}
                             >
                                 <span className="text-sm font-medium">Help</span>
-                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="h-4 w-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 01118 0z" />
                                 </svg>
                             </button>
@@ -741,7 +767,7 @@ const Edumpers = () => {
                                 </svg>
                                 <span>{locationError}</span>
                             </div>
-                            <button 
+                            <button
                                 className="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
                                 onClick={requestLocationAccess}
                             >
@@ -751,22 +777,22 @@ const Edumpers = () => {
                     )}
 
                     {/* Stats Overview */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                            <h3 className="text-lg font-semibold text-green-800">Total E-Dumpers</h3>
-                            <p className="text-3xl font-bold text-green-600">{stats.total}</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                        <div className="bg-green-50 p-3 sm:p-4 rounded-lg border border-green-200">
+                            <h3 className="text-sm sm:text-lg font-semibold text-green-800">Total E-Dumpers</h3>
+                            <p className="text-2xl sm:text-3xl font-bold text-green-600">{stats.total}</p>
                         </div>
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                            <h3 className="text-lg font-semibold text-blue-800">Available</h3>
-                            <p className="text-3xl font-bold text-blue-600">{stats.available}</p>
+                        <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
+                            <h3 className="text-sm sm:text-lg font-semibold text-blue-800">Available</h3>
+                            <p className="text-2xl sm:text-3xl font-bold text-blue-600">{stats.available}</p>
                         </div>
-                        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                            <h3 className="text-lg font-semibold text-red-800">Full</h3>
-                            <p className="text-3xl font-bold text-red-600">{stats.full}</p>
+                        <div className="bg-red-50 p-3 sm:p-4 rounded-lg border border-red-200">
+                            <h3 className="text-sm sm:text-lg font-semibold text-red-800">Full</h3>
+                            <p className="text-2xl sm:text-3xl font-bold text-red-600">{stats.full}</p>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <h3 className="text-lg font-semibold text-gray-800">Closed</h3>
-                            <p className="text-3xl font-bold text-gray-600">{stats.closed}</p>
+                        <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200">
+                            <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Closed</h3>
+                            <p className="text-2xl sm:text-3xl font-bold text-gray-600">{stats.closed}</p>
                         </div>
                     </div>
 
@@ -775,7 +801,7 @@ const Edumpers = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                                <select 
+                                <select
                                     className="w-full p-2 border border-gray-300 rounded"
                                     value={filters.status}
                                     onChange={(e) => handleFilterChange("status", e.target.value)}
@@ -786,10 +812,10 @@ const Edumpers = () => {
                                     <option value="Closed">Closed</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
-                                <select 
+                                <select
                                     className="w-full p-2 border border-gray-300 rounded"
                                     value={filters.capacity}
                                     onChange={(e) => handleFilterChange("capacity", e.target.value)}
@@ -800,11 +826,11 @@ const Edumpers = () => {
                                     <option value="Low">Low (&lt;30%)</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     placeholder="Search by name, address, materials..."
                                     className="w-full p-2 border border-gray-300 rounded"
                                     value={filters.search}
@@ -812,15 +838,15 @@ const Edumpers = () => {
                                 />
                             </div>
                         </div>
-                        
-                        <div className="flex gap-3 mt-4">
-                            <button 
+
+                        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                            <button
                                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition-colors"
                                 onClick={resetFilters}
                             >
                                 Reset Filters
                             </button>
-                            <button 
+                            <button
                                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
                                 onClick={() => setShowScheduleModal(true)}
                             >
@@ -832,7 +858,7 @@ const Edumpers = () => {
                     {/* Map and List View */}
                     <div className="flex flex-col lg:flex-row gap-6 mb-12">
                         {/* Map Container */}
-                        <div className="w-full lg:w-2/3" style={{ height: "60vh" }}>
+                        <div className="w-full lg:w-2/3" style={{ height: "50vh", minHeight: "400px" }}>
                             <GoogleMapReact
                                 bootstrapURLKeys={{ key: import.meta.env.VITE_GOOGLE_API_KEY }}
                                 defaultCenter={defaultProps.center}
@@ -855,12 +881,12 @@ const Edumpers = () => {
                                     />
                                 ))}
                             </GoogleMapReact>
-                            
+
                             {routeInfo && selectedEdumper && (
                                 <div className="bg-white p-4 mt-4 rounded-lg shadow-md">
                                     <h3 className="font-semibold mb-2">Route to {selectedEdumper.name}</h3>
                                     <p>Distance: {routeInfo.distance} | Time: {routeInfo.duration}</p>
-                                    <button 
+                                    <button
                                         className="text-red-600 text-sm mt-2 hover:text-red-800 transition-colors"
                                         onClick={clearDirections}
                                     >
@@ -869,11 +895,11 @@ const Edumpers = () => {
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* List View */}
                         <div className="w-full lg:w-1/3 bg-gray-50 p-4 rounded-lg" style={{ maxHeight: "60vh", overflowY: "auto" }}>
                             <h3 className="font-bold text-lg mb-4">E-Dumpers ({filteredEdumpers.length})</h3>
-                            
+
                             {filteredEdumpers.length === 0 ? (
                                 <p className="text-gray-500">No E-Dumpers match your filters.</p>
                             ) : (
@@ -882,32 +908,31 @@ const Edumpers = () => {
                                         <div key={edumper.id} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
                                             <h4 className="font-semibold">{edumper.name}</h4>
                                             <p className="text-sm text-gray-600">{edumper.address}</p>
-                                            
+
                                             <div className="flex items-center mt-2">
-                                                <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
-                                                    edumper.status === "Available" ? "bg-green-500" : 
-                                                    edumper.status === "Full" ? "bg-red-500" : "bg-gray-500"
-                                                }`}></span>
+                                                <span className={`inline-block w-3 h-3 rounded-full mr-2 ${edumper.status === "Available" ? "bg-green-500" :
+                                                        edumper.status === "Full" ? "bg-red-500" : "bg-gray-500"
+                                                    }`}></span>
                                                 <span className="text-sm">
                                                     {edumper.status} • {edumper.capacity}
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="mt-3 flex flex-wrap gap-2">
-                                                <button 
+                                                <button
                                                     className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
                                                     onClick={() => getDirections(edumper)}
                                                 >
                                                     Get Directions
                                                 </button>
-                                                <button 
+                                                <button
                                                     className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 transition-colors"
                                                     onClick={() => shareLocation(edumper)}
                                                 >
                                                     Share
                                                 </button>
                                             </div>
-                                            
+
                                             <div className="mt-2">
                                                 <p className="text-xs text-gray-500">
                                                     Accepts: {edumper.materials.join(", ")}
@@ -924,12 +949,12 @@ const Edumpers = () => {
                     </div>
 
                     {/* Additional Features Section */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12">
                         {/* Pickup Schedule */}
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                            <h2 className="text-2xl font-bold mb-4">Scheduled Pickup Services</h2>
+                        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                            <h2 className="text-xl sm:text-2xl font-bold mb-4">Scheduled Pickup Services</h2>
                             <p className="text-gray-600 mb-4">Can't reach an E-Dumper? We offer scheduled pickup services in these areas:</p>
-                            
+
                             <div className="space-y-4 mb-6">
                                 {pickupSchedule.map(item => (
                                     <div key={item.id} className="border-l-4 border-green-500 pl-4 py-2">
@@ -938,25 +963,25 @@ const Edumpers = () => {
                                     </div>
                                 ))}
                             </div>
-                            
-                            <button 
+
+                            <button
                                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
                                 onClick={() => setShowScheduleModal(true)}
                             >
                                 Schedule a Pickup
                             </button>
                         </div>
-                        
+
                         {/* E-Waste Facts Carousel */}
-                        <div className="bg-green-50 p-6 rounded-lg shadow-md">
-                            <h2 className="text-2xl font-bold mb-4">Did You Know?</h2>
+                        <div className="bg-green-50 p-4 sm:p-6 rounded-lg shadow-md">
+                            <h2 className="text-xl sm:text-2xl font-bold mb-4">Did You Know?</h2>
                             <div className="bg-white p-4 rounded-lg h-32 flex items-center justify-center">
                                 <p className="text-gray-800 italic text-center">"{ewasteFacts[currentFactIndex]}"</p>
                             </div>
                             <div className="flex justify-center mt-4">
                                 {ewasteFacts.map((_, index) => (
-                                    <button 
-                                        key={index} 
+                                    <button
+                                        key={index}
                                         className={`w-2 h-2 rounded-full mx-1 ${index === currentFactIndex ? 'bg-green-600' : 'bg-green-300'}`}
                                         onClick={() => setCurrentFactIndex(index)}
                                     ></button>
@@ -969,69 +994,69 @@ const Edumpers = () => {
                     </div>
 
                     {/* Recycling Impact Calculator */}
-                    <div className="bg-green-50 p-6 rounded-lg shadow-md mb-12">
-                        <h2 className="text-2xl font-bold mb-4">Recycling Impact Calculator</h2>
+                    <div className="bg-green-50 p-4 sm:p-6 rounded-lg shadow-md mb-12">
+                        <h2 className="text-xl sm:text-2xl font-bold mb-4">Recycling Impact Calculator</h2>
                         <p className="text-gray-600 mb-4">See how much you can help the environment by recycling your e-waste:</p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-                            <div className="bg-white p-4 rounded-lg text-center">
-                                <h3 className="font-semibold mb-2">Smartphones</h3>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+                            <div className="bg-white p-3 sm:p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2 text-sm sm:text-base">Smartphones</h3>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className="w-full p-2 border border-gray-300 rounded text-center"
                                     value={impactData.smartphones}
                                     onChange={(e) => handleImpactChange("smartphones", e.target.value)}
                                 />
-                                <p className="text-sm text-gray-600 mt-2">Saves enough energy to power a laptop for 40 hours each</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mt-2">Saves enough energy to power a laptop for 40 hours each</p>
                             </div>
-                            <div className="bg-white p-4 rounded-lg text-center">
-                                <h3 className="font-semibold mb-2">Laptops</h3>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                            <div className="bg-white p-3 sm:p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2 text-sm sm:text-base">Laptops</h3>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className="w-full p-2 border border-gray-300 rounded text-center"
                                     value={impactData.laptops}
                                     onChange={(e) => handleImpactChange("laptops", e.target.value)}
                                 />
-                                <p className="text-sm text-gray-600 mt-2">Saves enough energy to power a home for 2 days each</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mt-2">Saves enough energy to power a home for 2 days each</p>
                             </div>
-                            <div className="bg-white p-4 rounded-lg text-center">
-                                <h3 className="font-semibold mb-2">Monitors</h3>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                            <div className="bg-white p-3 sm:p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2 text-sm sm:text-base">Monitors</h3>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className="w-full p-2 border border-gray-300 rounded text-center"
                                     value={impactData.monitors}
                                     onChange={(e) => handleImpactChange("monitors", e.target.value)}
                                 />
-                                <p className="text-sm text-gray-600 mt-2">Prevents 4 kg of lead from entering the environment each</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mt-2">Prevents 4 kg of lead from entering the environment each</p>
                             </div>
-                            <div className="bg-white p-4 rounded-lg text-center">
-                                <h3 className="font-semibold mb-2">Tablets</h3>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                            <div className="bg-white p-3 sm:p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2 text-sm sm:text-base">Tablets</h3>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className="w-full p-2 border border-gray-300 rounded text-center"
                                     value={impactData.tablets}
                                     onChange={(e) => handleImpactChange("tablets", e.target.value)}
                                 />
-                                <p className="text-sm text-gray-600 mt-2">Saves 150 liters of water and prevents 8 kg of CO2 each</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mt-2">Saves 150 liters of water and prevents 8 kg of CO2 each</p>
                             </div>
-                            <div className="bg-white p-4 rounded-lg text-center">
-                                <h3 className="font-semibold mb-2">Printers</h3>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    className="w-full p-2 border border-gray-300 rounded text-center" 
+                            <div className="bg-white p-3 sm:p-4 rounded-lg text-center">
+                                <h3 className="font-semibold mb-2 text-sm sm:text-base">Printers</h3>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className="w-full p-2 border border-gray-300 rounded text-center"
                                     value={impactData.printers}
                                     onChange={(e) => handleImpactChange("printers", e.target.value)}
                                 />
-                                <p className="text-sm text-gray-600 mt-2">Recycles 2.5 kg of plastic and 1.8 kg of steel each</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mt-2">Recycles 2.5 kg of plastic and 1.8 kg of steel each</p>
                             </div>
                         </div>
-                        
-                        <button 
+
+                        <button
                             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
                             onClick={calculateImpact}
                         >
@@ -1072,9 +1097,9 @@ const Edumpers = () => {
                     </div>
 
                     {/* Educational Resources */}
-                    <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-                        <h2 className="text-2xl font-bold mb-4">E-Waste Educational Resources</h2>
-                        
+                    <div className="bg-gray-50 p-4 sm:p-6 rounded-lg shadow-md">
+                        <h2 className="text-xl sm:text-2xl font-bold mb-4">E-Waste Educational Resources</h2>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <h3 className="font-semibold mb-2">Why Recycle E-Waste?</h3>
@@ -1084,14 +1109,9 @@ const Edumpers = () => {
                                     <li>Reduces energy consumption compared to mining new materials</li>
                                     <li>Creates jobs in the recycling industry</li>
                                     <li>Protects the environment and human health</li>
-                                    <li>Reduces greenhouse gas emissions from manufacturing</li>
-                                    <li>Prevents soil and water contamination</li>
-                                    <li>Conserves limited natural resources</li>
-                                    <li>Supports a circular economy</li>
-                                    <li>Reduces the need for destructive mining practices</li>
                                 </ul>
                             </div>
-                            
+
                             <div>
                                 <h3 className="font-semibold mb-2">How to Prepare Your E-Waste</h3>
                                 <ul className="list-disc pl-5 text-gray-600">
@@ -1100,34 +1120,18 @@ const Edumpers = () => {
                                     <li>Keep different types of e-waste separated</li>
                                     <li>Place small items in bags to prevent loss</li>
                                     <li>Label devices with any known issues</li>
-                                    <li>Remove any personal storage media</li>
-                                    <li>Keep original packaging if available</li>
-                                    <li>Check for any return or trade-in programs</li>
-                                    <li>Secure fragile items to prevent damage</li>
-                                    <li>Keep cables and accessories with their devices</li>
                                 </ul>
                             </div>
                         </div>
-                        
+
                         <div className="mt-6">
                             <h3 className="font-semibold mb-2">What Happens to Your E-Waste?</h3>
                             <div className="bg-white p-4 rounded-lg">
                                 <p className="text-gray-600">
-                                    Once collected, your e-waste goes through a careful process: sorting, dismantling, 
-                                    separation of materials, and proper recycling. Valuable materials like gold, silver, 
-                                    copper, and palladium are recovered and used to make new products. Hazardous materials 
-                                    are disposed of safely to prevent environmental contamination. The process includes:
+                                    Once collected, your e-waste goes through a careful process: sorting, dismantling,
+                                    separation of materials, and proper recycling. Valuable materials like gold, silver,
+                                    copper, and palladium are recovered and used to make new products.
                                 </p>
-                                <ol className="list-decimal pl-5 mt-2 text-gray-600">
-                                    <li>Collection and transportation to recycling facilities</li>
-                                    <li>Manual sorting and disassembly of devices</li>
-                                    <li>Separation of components (circuit boards, plastics, metals)</li>
-                                    <li>Shredding and mechanical separation of materials</li>
-                                    <li>Recovery of precious metals through specialized processes</li>
-                                    <li>Proper disposal of hazardous materials</li>
-                                    <li>Quality control and preparation of recovered materials for reuse</li>
-                                    <li>Documentation and reporting of recycling outcomes</li>
-                                </ol>
                             </div>
                         </div>
                     </div>
