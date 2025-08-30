@@ -10,9 +10,9 @@
 7. [Installation](#installation)
 8. [Usage](#usage)
 9. [Technologies Used](#technologies-used)
-10. [Contributing](#contributing)
-11. [License](#license)
-
+10. [Screenshots](#screenshots)
+11. [Contributing](#contributing)
+12. [License](#license)
 ## Introduction
 
 Green Grid is a comprehensive digital platform dedicated to tackling the global e-waste crisis. We bridge the gap between consumers and responsible recycling, making it easier for individuals and businesses to contribute to a sustainable future. Our platform combines a facility locator, educational resources, a rewarding incentive system, and an AI assistant to create a holistic solution for electronic waste disposal.
@@ -133,7 +133,43 @@ npm run dev
 | **Authentication**| JWT (JSON Web Tokens)                                                        |
 | **Styling**       | CSS Modules, Tailwind CSS                                                    |
 
+## Screenshots
 
+### 1. Home Page
+![Home Page](assets/screenshots/home-page.png)
+
+### 2. Login
+![Login](assets/screenshots/login.png)
+
+### 3. Sign Up
+![Sign Up](assets/screenshots/sign-up.png)
+
+### 4. User Profile
+![User Profile](assets/screenshots/user-profile.png)
+
+### 5. Facility Locator
+![Facility Locator](assets/screenshots/facility-locator.png)
+
+### 6. Insights & Awareness
+![Insights & Awareness](assets/screenshots/insights-awareness.png)
+
+### 7. Green Rewards
+![Green Rewards](assets/screenshots/green-rewards.png)
+
+### 8. Eco AI Assistant
+![Eco AI Assistant](assets/screenshots/eco-ai-assistant.png)
+
+### 9. Eco AI Assistant Response
+![Eco AI Assistant Response](assets/screenshots/eco-ai-assistant-response.png)
+
+### 10. Green Grid Auto Replay
+![Green Grid Auto Replay](assets/screenshots/green-grid-auto-replay.png)
+
+### 11. About Us
+![About Us](assets/screenshots/about-us.png)
+
+### 12. Contact Us
+![Contact Us](assets/screenshots/contact-us.png)
 
 ## Contributing
 
