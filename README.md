@@ -136,40 +136,40 @@ npm run dev
 ## Screenshots
 
 ### 1. Home Page
-![Home Page](assets/screenshots/home-page.png)
+![Home Page](client/src/assets/screenshots/home-page.png)
 
 ### 2. Login
-![Login](assets/screenshots/login.png)
+![Login](client/src/assets/screenshots/login.png)
 
 ### 3. Sign Up
-![Sign Up](assets/screenshots/sign-up.png)
+![Sign Up](client/src/assets/screenshots/sign-up.png)
 
 ### 4. User Profile
-![User Profile](assets/screenshots/user-profile.png)
+![User Profile](client/src/assets/screenshots/user-profile.png)
 
 ### 5. Facility Locator
-![Facility Locator](assets/screenshots/facility-locator.png)
+![Facility Locator](client/src/assets/screenshots/facility-locator.png)
 
 ### 6. Insights & Awareness
-![Insights & Awareness](assets/screenshots/insights-awareness.png)
+![Insights & Awareness](client/src/assets/screenshots/insights-awareness.png)
 
 ### 7. Green Rewards
-![Green Rewards](assets/screenshots/green-rewards.png)
+![Green Rewards](client/src/assets/screenshots/green-rewards.png)
 
 ### 8. Eco AI Assistant
-![Eco AI Assistant](assets/screenshots/eco-ai-assistant.png)
+![Eco AI Assistant](client/src/assets/screenshots/eco-ai-assistant.png)
 
 ### 9. Eco AI Assistant Response
-![Eco AI Assistant Response](assets/screenshots/eco-ai-assistant-response.png)
+![Eco AI Assistant Response](client/src/assets/screenshots/eco-ai-assistant-response.png)
 
 ### 10. Green Grid Auto Replay
-![Green Grid Auto Replay](assets/screenshots/green-grid-auto-replay.png)
+![Green Grid Auto Replay](client/src/assets/screenshots/green-grid-auto-replay.png)
 
 ### 11. About Us
-![About Us](assets/screenshots/about-us.png)
+![About Us](client/src/assets/screenshots/about-us.png)
 
 ### 12. Contact Us
-![Contact Us](assets/screenshots/contact-us.png)
+![Contact Us](client/src/assets/screenshots/contact-us.png)
 
 ## Contributing
 
