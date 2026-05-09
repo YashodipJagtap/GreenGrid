@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@emailjs/nodejs": "^5.0.2",
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "colors": "^1.4.0",

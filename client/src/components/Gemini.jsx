@@ -1,22 +1,77 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ✅ OpenRouter API Configuration
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const SITE_URL = import.meta.env.VITE_SITE_URL;
-const SITE_NAME = import.meta.env.VITE_SITE_NAME;
+// ✅ Google Gemini API Configuration
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-function OpenRouterAI() {
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+
+function GeminiAI() {
     const [prompt, setPrompt] = useState("");
     const [response, setResponse] = useState("");
     const [loading, setLoading] = useState(false);
+    const [apiKeyError, setApiKeyError] = useState(false);
+    const [availableModels, setAvailableModels] = useState([]);
+    const [selectedModel, setSelectedModel] = useState("gemini-1.0-pro"); // Default to stable model
+
+    // Fetch available models on component mount
+    useEffect(() => {
+        const fetchModels = async () => {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                return;
+            }
+
+            try {
+                // You can list models using the REST API
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`
+                );
+                const data = await response.json();
+
+                if (data.models) {
+                    // Filter for text generation models
+                    const textModels = data.models
+                        .filter(model =>
+                            model.supportedGenerationMethods?.includes('generateContent') &&
+                            model.name.includes('gemini')
+                        )
+                        .map(model => model.name.replace('models/', ''));
+
+                    setAvailableModels(textModels);
+
+                    // Set default model
+                    if (textModels.includes('gemini-1.0-pro')) {
+                        setSelectedModel('gemini-1.0-pro');
+                    } else if (textModels.length > 0) {
+                        setSelectedModel(textModels[0]);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching models:", error);
+            }
+        };
+
+        fetchModels();
+    }, []);
 
     const handleSubmit = async () => {
         if (!prompt.trim()) return;
+
+        // Check if API key is configured
+        if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+            setApiKeyError(true);
+            setResponse("⚠️ Gemini API key not configured. Please add your API key to the .env file.");
+            return;
+        }
+
         setLoading(true);
+        setApiKeyError(false);
+
         try {
-            const enhancedPrompt = `You are an e-waste management specialist AI assistant for Green Grid. 
+            const enhancedPrompt = `You are an e-waste management specialist AI assistant.
             Please provide helpful, expert advice about: ${prompt}. 
             Focus exclusively on e-waste recycling, electronic disposal, sustainable practices, 
             finding recycling centers, and environmental impact of electronics. 
@@ -29,54 +84,39 @@ function OpenRouterAI() {
             - Use **double asterisks** around important points for bold formatting
             - Use *single asterisks* around less important points for italic formatting  
             - Keep the response educational and professional
-            - Do not include "Green Grid" or any company names in the response
+            - Do not include any company names in the response
             - No tables, no markdown headers, no hashtags, no horizontal lines`;
 
-            const apiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                    "HTTP-Referer": SITE_URL,
-                    "X-Title": SITE_NAME,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "model": "openai/gpt-oss-20b:free",
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": enhancedPrompt
-                        }
-                    ]
-                })
+            // Get the generative model - using the selected model
+            const model = genAI.getGenerativeModel({
+                model: selectedModel,
             });
 
-            if (!apiResponse.ok) {
-                throw new Error(`HTTP error! status: ${apiResponse.status}`);
-            }
+            // Generate content
+            const result = await model.generateContent(enhancedPrompt);
+            const response = await result.response;
+            let cleanResponse = response.text();
 
-            const data = await apiResponse.json();
+            // Remove unwanted phrases and formatting
+            cleanResponse = cleanResponse.replace(/---+/g, ''); // Remove horizontal lines
+            cleanResponse = cleanResponse.replace(/##\s+/g, '');
+            cleanResponse = cleanResponse.replace(/#\s+/g, '');
 
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-                let cleanResponse = data.choices[0].message.content;
-
-                // Remove unwanted phrases
-                cleanResponse = cleanResponse.replace(/Green Grid\s*–?\s*Your E.?Waste Management Partner/gi, '');
-                cleanResponse = cleanResponse.replace(/Expert guidance on recycling, sustainable disposal, and locating trusted centers/gi, '');
-                cleanResponse = cleanResponse.replace(/Green Grid/gi, '');
-                cleanResponse = cleanResponse.replace(/---+/g, ''); // Remove horizontal lines
-
-                // Remove markdown headers but keep formatting symbols
-                cleanResponse = cleanResponse.replace(/##\s+/g, '');
-                cleanResponse = cleanResponse.replace(/#\s+/g, '');
-
-                setResponse(cleanResponse.trim());
-            } else {
-                throw new Error('No response from AI');
-            }
+            setResponse(cleanResponse.trim());
         } catch (error) {
             console.error("Error:", error);
-            setResponse("Error: Unable to get response. Please try again later.");
+
+            // Handle specific Gemini API errors
+            if (error.message?.includes('API key')) {
+                setResponse("❌ Invalid Gemini API key. Please check your API key in the .env file.");
+                setApiKeyError(true);
+            } else if (error.message?.includes('quota')) {
+                setResponse("⚠️ API quota exceeded. Please try again later.");
+            } else if (error.message?.includes('not found')) {
+                setResponse(`❌ Model "${selectedModel}" not found. Please try one of these models: ${availableModels.join(', ')}`);
+            } else {
+                setResponse(`Error: ${error.message || "Unable to get response. Please try again later."}`);
+            }
         }
         setLoading(false);
     };
@@ -85,6 +125,7 @@ function OpenRouterAI() {
     const handleClear = () => {
         setPrompt("");
         setResponse("");
+        setApiKeyError(false);
     };
 
     // Handle Enter key press in textarea
@@ -119,9 +160,36 @@ function OpenRouterAI() {
                             Green Grid AI Assistant
                         </h1>
                         <p className="text-base sm:text-lg text-gray-600">
-                            Get expert guidance on e-waste management and recycling
+                            Powered by Google Gemini • Get expert guidance on e-waste management and recycling
                         </p>
+                        {(!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') && (
+                            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <p className="text-sm text-yellow-800">
+                                    ⚠️ Gemini API key not configured. Please add your API key to use this feature.
+                                </p>
+                            </div>
+                        )}
                     </div>
+
+                    {/* Model Selection (if multiple models available) */}
+                    {availableModels.length > 0 && (
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Select Gemini Model:
+                            </label>
+                            <select
+                                value={selectedModel}
+                                onChange={(e) => setSelectedModel(e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                            >
+                                {availableModels.map(model => (
+                                    <option key={model} value={model}>
+                                        {model}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     {/* Input Section */}
                     <div className="mb-6 sm:mb-7">
@@ -148,6 +216,7 @@ function OpenRouterAI() {
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             onKeyPress={handleKeyPress}
+                            disabled={!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE'}
                         />
                         <p className="text-xs text-gray-500 mt-1">
                             💡 Press <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Enter</kbd> to get expert advice • Press <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Shift + Enter</kbd> for new line
@@ -158,7 +227,7 @@ function OpenRouterAI() {
                     <div className="flex flex-col sm:flex-row gap-3 sm:space-x-4 mb-6 sm:mb-7">
                         <button
                             onClick={handleSubmit}
-                            disabled={loading || !prompt.trim()}
+                            disabled={loading || !prompt.trim() || !GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE'}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 sm:py-3 px-4 sm:px-5 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed text-sm sm:text-base"
                         >
                             {loading ? (
@@ -214,7 +283,7 @@ function OpenRouterAI() {
                     )}
 
                     {/* Tips Section */}
-                    {!response && (
+                    {!response && !apiKeyError && (
                         <div className="mt-6 sm:mt-7 bg-gray-100 p-4 sm:p-5 rounded-lg">
                             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                                 💡 Suggested Questions:
@@ -225,33 +294,30 @@ function OpenRouterAI() {
                                 <li>Benefits of proper e-waste disposal</li>
                                 <li>How to reduce electronic carbon footprint?</li>
                                 <li>Eco-friendly electronics options</li>
-                                <li>How does Green Grid's reward system work?</li>
+                                <li>How does e-waste recycling work step by step?</li>
                             </ul>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Add custom styling for formatted content */}
+            {/* Add custom styling for formatted content - UPDATED: Removed green background */}
             <style>{`
                 .response-content {
                     line-height: 1.7;
                 }
                 .response-content strong {
-                    color: #1a202c;
-                    font-weight: 600;
-                    background-color: #f0fff4;
-                    padding: 2px 4px;
-                    border-radius: 3px;
+                    color: #000000;  /* Pure black for bold text */
+                    font-weight: 700; /* Bolder weight for emphasis */
                 }
                 .response-content em {
-                    color: #4a5568;
+                    color: #333333;  /* Dark gray for italic text */
                     font-style: italic;
                 }
                 .response-content .bullet {
                     display: inline-block;
                     width: 1.2em;
-                    color: #059669;
+                    color: #000000;  /* Black bullets */
                     font-weight: bold;
                 }
                 .response-content ul, .response-content ol {
@@ -272,4 +338,4 @@ function OpenRouterAI() {
     );
 }
 
-export default OpenRouterAI;
+export default GeminiAI;
