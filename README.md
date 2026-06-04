@@ -17,7 +17,7 @@
 
 Green Grid is a comprehensive digital platform dedicated to tackling the global e-waste crisis. We bridge the gap between consumers and responsible recycling, making it easier for individuals and businesses to contribute to a sustainable future. Our platform combines a facility locator, educational resources, a rewarding incentive system, and an AI assistant to create a holistic solution for electronic waste disposal.
 
-Did you know? A single person generates approximately 7.6kg of e-waste, yet only 17.4% of e-waste worldwide is properly recycled.
+Did you know? A single person generates approximately 7.6kg of E-Waste, yet only 17.4% of e-waste worldwide is properly recycled.
 
 ## Problem Statement
 
