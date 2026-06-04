@@ -11,7 +11,7 @@ const fetch = require("node-fetch");
 
 const app = express();
 
-// Load environment variables first
+// Load environment variables 1st
 dotenv.config();
 
 // Middleware - CORS should be at the top with proper configuration
